@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realis — Campaign Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --bg: #0D0D14; --card: #1E1C2E; --border: #2E2B45; --text: #C4B8D4; --text-dim: #7A7295; --accent: #E8C547; --accent-dim: #9E8A32; --white: #F0EBF8; }
+html { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); font-size: 16px; }
+body { min-height: 100vh; }
+
+.stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.star  { position: absolute; border-radius: 50%; background: white; }
+.corpse-sun { position: fixed; top: -12vw; right: -8vw; width: 40vw; height: 40vw; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #F5E070, #E8C547 30%, #B8860B 60%, #3D2800 85%, transparent); opacity: 0.12; filter: blur(4px); pointer-events: none; z-index: 0; }
+
+.page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 4rem 5vw 6rem; }
+
+/* header */
+.header { margin-bottom: 4rem; }
+.eyebrow { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+h1 { font-family: 'Crimson Pro', serif; font-size: clamp(2.8rem,7vw,5rem); font-weight: 600; color: var(--white); line-height: 1.0; letter-spacing: -0.02em; margin-bottom: 0.2em; }
+.header-sub { font-family: 'Crimson Pro', serif; font-style: italic; font-size: clamp(1rem,2vw,1.3rem); color: var(--text-dim); margin-bottom: 1.5rem; }
+.header-desc { font-size: clamp(0.82rem,1.3vw,0.95rem); color: var(--text); line-height: 1.7; max-width: 560px; }
+
+/* section labels */
+.section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.8rem; margin-top: 2.5rem; }
+
+/* route cards */
+.route-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.8rem; }
+.route-card { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 1.4rem; text-decoration: none; transition: border-color 0.15s, background 0.15s; }
+.route-card:hover { border-color: var(--accent-dim); background: rgba(232,197,71,0.04); }
+.route-card.primary { border-color: rgba(232,197,71,0.3); }
+.route-card.primary:hover { border-color: var(--accent); }
+.route-tag { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; }
+.route-title { font-family: 'Crimson Pro', serif; font-size: clamp(1.1rem,2vw,1.35rem); font-weight: 600; color: var(--white); margin-bottom: 0.3rem; line-height: 1.2; }
+.route-desc { font-size: clamp(0.72rem,1.1vw,0.82rem); color: var(--text-dim); line-height: 1.55; }
+.route-arrow { font-size: 0.75rem; color: var(--accent-dim); margin-top: 0.7rem; }
+
+/* pbp section */
+.pbp-block { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem 1.6rem; margin-top: 0.8rem; }
+.pbp-title { font-family: 'Crimson Pro', serif; font-size: 1.2rem; font-weight: 600; color: var(--white); margin-bottom: 0.6rem; }
+.pbp-body { font-size: clamp(0.78rem,1.2vw,0.88rem); color: var(--text); line-height: 1.7; }
+.pbp-body p { margin-bottom: 0.5em; }
+.pbp-body p:last-child { margin-bottom: 0; }
+
+/* tools grid */
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.7rem; }
+.tool-card { display: block; background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; text-decoration: none; transition: border-color 0.15s; }
+.tool-card:hover { border-color: var(--accent-dim); }
+.tool-tag { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.3rem; }
+.tool-title { font-family: 'Crimson Pro', serif; font-size: 1rem; font-weight: 600; color: var(--white); margin-bottom: 0.2rem; }
+.tool-desc { font-size: clamp(0.68rem,1vw,0.78rem); color: var(--text-dim); line-height: 1.5; }
+
+/* divider */
+hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+/* footer */
+footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.footer-notice { font-size: 0.72rem; color: var(--text-dim); line-height: 1.6; max-width: 560px; }
+.footer-notice a { color: var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="corpse-sun"></div>
+
+<div class="page">
+
+  <div class="header">
+    <div class="eyebrow">Campaign Site · Realis by Austin Walker</div>
+    <h1>Realis</h1>
+    <div class="header-sub">A game of a thousand moons.</div>
+    <p class="header-desc">You're here because you've been invited to play. Everything you need to get started is on this page. Pick where you are and go from there.</p>
+  </div>
+
+  <div class="section-label">Start here</div>
+  <div class="route-grid">
+    <a href="newplayer.html" class="route-card primary">
+      <div class="route-tag">Never played an RPG</div>
+      <div class="route-title">What even is this?</div>
+      <div class="route-desc">A short guide to tabletop RPGs, what to expect, and what's expected of you. Start here if you've never done this before.</div>
+      <div class="route-arrow">Start here →</div>
+    </a>
+    <a href="realis_player_guide.html" class="route-card primary">
+      <div class="route-tag">Know RPGs, new to Realis</div>
+      <div class="route-title">Player Guide</div>
+      <div class="route-desc">What makes Realis different, how Sentences and Conflict work, all 50+ classes, and a Session Zero checklist.</div>
+      <div class="route-arrow">Read the guide →</div>
+    </a>
+    <div class="route-card" style="opacity:0.45; cursor:default;">
+      <div class="route-tag">Joining mid-campaign</div>
+      <div class="route-title">Catching Up</div>
+      <div class="route-desc">The GM has filled this in for you — where the story is, who the Band is, and how to slot in.</div>
+      <div class="route-arrow" style="color:var(--text-dim);">Under construction</div>
+    </div>
+  </div>
+
+  <div class="section-label">What is play by post?</div>
+  <div class="pbp-block">
+    <div class="pbp-title">We're not meeting at a table. We're playing in writing, on Discord, on our own schedules.</div>
+    <div class="pbp-body">
+      <p>The GM posts a scene. Players write their characters' responses when they can — a few lines, a paragraph, whatever fits the moment. The story moves in pieces, over days and weeks.</p>
+      <p>There's no fixed session time. No one has to be online at the same time. You write when you can, the GM moves the story forward, and play builds up over time like a collaborative novel.</p>
+      <p>The main thing it asks of you: don't go silent. A few lines every couple of days keeps the game alive. If life gets in the way, just say so — the game waits for you.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section-label">Build your character</div>
+  <div class="tools-grid">
+    <a href="realis_classpicker.html" class="tool-card">
+      <div class="tool-tag">Step 1</div>
+      <div class="tool-title">Class Picker</div>
+      <div class="tool-desc">Three questions. Recommends classes based on your instincts, with full Sentences shown.</div>
+    </a>
+    <a href="realis_charsheet.html" class="tool-card">
+      <div class="tool-tag">Step 2</div>
+      <div class="tool-title">Sheet Walkthrough</div>
+      <div class="tool-desc">Watch Elodie build Maren step by step. Then fill out your own sheet in Discord.</div>
+    </a>
+    <a href="https://lawson-coleman.itch.io/printable-character-sheets-for-realis" target="_blank" class="tool-card">
+      <div class="tool-tag">Reference</div>
+      <div class="tool-title">Printable Sheet ↗</div>
+      <div class="tool-desc">Printable character sheets by Lawson Coleman, based on the official digital sheets. Useful during chargen.</div>
+    </a>
+  </div>
+
+  <div style="margin-top:0.6rem; padding:0.7rem 1rem; background: rgba(232,197,71,0.04); border: 1px solid rgba(232,197,71,0.15); border-radius:6px; font-size:0.75rem; color:var(--text-dim); line-height:1.6;">
+    Your actual character sheet lives in <strong style="color:var(--white);">#realis-characters</strong> on Discord — not here. These tools help you build it. Nothing you enter on this site is saved.
+  </div>
+
+  <hr>
+
+  <footer>
+    <div class="footer-notice">
+      This site is a player resource for a private Realis campaign. Realis is by Austin Walker / Possible Worlds Games. Nothing on this site is saved or stored — it's a browser-only tool. For questions, DM the GM on Discord.
+    </div>
+  </footer>
+
+</div>
+
+<script>
+function makeStars(n){
+  const c=document.getElementById('stars');
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*2+0.3;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${(Math.random()*0.5+0.1).toFixed(2)}`;
+    c.appendChild(s);
+  }
+}
+makeStars(150);
+</script>
+</body>
+</html>

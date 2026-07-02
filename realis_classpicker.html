@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realis — Class Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0D0D14;
+  --card:      #1E1C2E;
+  --border:    #2E2B45;
+  --text:      #C4B8D4;
+  --text-dim:  #7A7295;
+  --accent:    #E8C547;
+  --accent-dim:#9E8A32;
+  --white:     #F0EBF8;
+  --danger:    #c47a7a;
+}
+
+html, body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+
+.breadcrumb { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+.breadcrumb a { color: var(--text-dim); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+/* header */
+.header { text-align: center; margin-bottom: 3rem; }
+.eyebrow {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem;
+}
+h1 {
+  font-family: 'Crimson Pro', serif; font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 600; color: var(--white); line-height: 1.1; margin-bottom: 0.4rem;
+}
+.header p { font-size: 0.9rem; color: var(--text-dim); }
+
+/* progress */
+.progress {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 2.5rem; justify-content: center;
+}
+.pip {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: background 0.2s, transform 0.2s;
+}
+.pip.done { background: var(--accent-dim); }
+.pip.active { background: var(--accent); transform: scale(1.4); }
+
+/* step */
+.step { display: none; }
+.step.active { display: block; }
+
+.step-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem;
+}
+.step-q {
+  font-family: 'Crimson Pro', serif; font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 0.5rem;
+}
+.step-sub { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+
+/* options grid */
+.options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.opt {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+  width: 100%;
+}
+.opt:hover { border-color: var(--accent-dim); background: rgba(232,197,71,0.04); }
+.opt.selected { border-color: var(--accent); background: rgba(232,197,71,0.07); }
+
+.opt-name {
+  font-weight: 600; color: var(--white);
+  font-size: 0.9rem; margin-bottom: 0.2rem;
+}
+.opt-desc { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+
+/* nav */
+.nav {
+  display: flex; gap: 0.8rem; margin-top: 1.8rem; align-items: center;
+}
+.btn {
+  background: var(--accent); color: var(--bg);
+  border: none; border-radius: 6px;
+  padding: 0.65rem 1.4rem;
+  font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn:disabled { opacity: 0.3; cursor: default; }
+.btn-ghost {
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.65rem 1.2rem;
+  font-family: 'Inter', sans-serif; font-size: 0.82rem;
+  cursor: pointer; transition: border-color 0.15s, color 0.15s;
+}
+.btn-ghost:hover { border-color: var(--text-dim); color: var(--white); }
+
+/* results */
+.results { display: none; }
+.results.active { display: block; }
+
+.results-header { margin-bottom: 2rem; }
+.results-header .step-label { margin-bottom: 0.5rem; }
+.results-header .step-q { margin-bottom: 0.3rem; }
+.results-header p { font-size: 0.82rem; color: var(--text-dim); }
+
+.class-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+
+.class-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  transition: border-color 0.15s;
+}
+.class-card.highlight { border-color: var(--accent); }
+
+.class-card-top {
+  display: flex; align-items: baseline;
+  gap: 0.8rem; margin-bottom: 0.3rem;
+}
+.class-card-name {
+  font-family: 'Crimson Pro', serif; font-size: 1.3rem;
+  font-weight: 600; color: var(--white);
+}
+.class-card-sphere {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent-dim);
+}
+.class-card-tagline {
+  font-size: 0.8rem; color: var(--text-dim);
+  font-style: italic; margin-bottom: 0.9rem;
+}
+.class-sentences { display: flex; flex-direction: column; gap: 0.35rem; }
+.class-sentence {
+  font-family: 'Crimson Pro', serif; font-style: italic;
+  font-size: 0.88rem; color: var(--text);
+  padding-left: 0.8rem; border-left: 2px solid var(--border);
+  line-height: 1.4;
+}
+.class-sentence.flaw {
+  color: var(--text-dim); border-color: rgba(196,122,122,0.3);
+}
+.class-card-footer {
+  margin-top: 1rem; padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 0.6rem; align-items: center;
+}
+.btn-pick {
+  background: var(--accent); color: var(--bg);
+  border: none; border-radius: 5px;
+  padding: 0.5rem 1rem;
+  font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn-pick:hover { opacity: 0.85; }
+.copy-msg {
+  font-size: 0.72rem; color: var(--accent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.copy-msg.show { opacity: 1; }
+
+.browse-all { margin-top: 2rem; }
+.browse-toggle {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.6rem 1rem;
+  color: var(--text-dim); font-family: 'Inter', sans-serif;
+  font-size: 0.8rem; cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  margin-bottom: 1rem;
+}
+.browse-toggle:hover { border-color: var(--text-dim); color: var(--white); }
+
+.sphere-tabs {
+  display: none; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+}
+.sphere-tabs.open { display: flex; }
+.sphere-tab {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.3rem 0.7rem;
+  font-size: 0.72rem; font-weight: 600; color: var(--text-dim);
+  cursor: pointer; transition: all 0.15s;
+}
+.sphere-tab:hover, .sphere-tab.active {
+  border-color: var(--accent); color: var(--white);
+}
+.sphere-classes { display: none; }
+.sphere-classes.open { display: flex; flex-direction: column; gap: 0.8rem; }
+
+.restart {
+  margin-top: 2.5rem; padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.restart p { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.6rem; }
+
+.glossary {
+  margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem;
+}
+.glossary-toggle {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-dim);
+  cursor: pointer; user-select: none;
+  transition: color 0.15s; padding-bottom: 0.6rem;
+}
+.glossary-toggle:hover, .glossary-toggle.open { color: var(--white); }
+.glossary-body { display: none; flex-direction: column; gap: 0.5rem; padding-top: 0.4rem; }
+.glossary-body.open { display: flex; }
+.gloss-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.7rem 0.9rem;
+}
+.gloss-term { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 0.25rem; }
+.gloss-def  { font-size: 0.78rem; color: var(--text); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="breadcrumb"><a href="index.html">Home</a> → Class Picker</div>
+  <div class="header">
+    <div class="eyebrow">Realis · Character Creation</div>
+    <h1>Find your class.</h1>
+    <p>Three questions. Takes about two minutes.</p>
+  </div>
+
+  <div class="progress">
+    <div class="pip active" id="pip0"></div>
+    <div class="pip" id="pip1"></div>
+    <div class="pip" id="pip2"></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step0">
+    <div class="step-label">Question 1 of 3</div>
+    <div class="step-q">When things go wrong, your character reaches for…</div>
+    <div class="step-sub">Pick the one that feels most true, even if it's not perfect.</div>
+    <div class="options" id="opts0"></div>
+    <div class="nav">
+      <button class="btn" id="next0" disabled onclick="next(0)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step1">
+    <div class="step-label">Question 2 of 3</div>
+    <div class="step-q">Your character is more likely to…</div>
+    <div class="step-sub">Go with your gut.</div>
+    <div class="options" id="opts1"></div>
+    <div class="nav">
+      <button class="btn-ghost" onclick="back(1)">Back</button>
+      <button class="btn" id="next1" disabled onclick="next(1)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step2">
+    <div class="step-label">Question 3 of 3</div>
+    <div class="step-q">Your character's power comes from…</div>
+    <div class="step-sub">What makes them capable?</div>
+    <div class="options" id="opts2"></div>
+    <div class="nav">
+      <button class="btn-ghost" onclick="back(2)">Back</button>
+      <button class="btn" id="next2" disabled onclick="showResults()">See my classes</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="results-header">
+      <div class="step-label">Your matches</div>
+      <div class="step-q">Here's where you land.</div>
+      <p>These are suggestions, not rules. Browse all classes at the bottom if none of these spark anything. You can always switch mid-campaign.</p>
+    </div>
+    <div class="class-list" id="class-list"></div>
+
+    <div class="browse-all">
+      <button class="browse-toggle" onclick="toggleBrowse()">Browse all classes by Sphere</button>
+      <div class="sphere-tabs" id="sphere-tabs"></div>
+      <div id="sphere-panels"></div>
+    </div>
+
+    <div class="restart">
+      <p>Want to start over?</p>
+      <button class="btn-ghost" onclick="restart()">Start again</button>
+    </div>
+  </div>
+
+  <!-- GLOSSARY — always visible -->
+  <div class="glossary">
+    <div class="glossary-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.classList.toggle('open')">
+      Terms you'll see on class sheets ↓
+    </div>
+    <div class="glossary-body">
+      <div class="gloss-item">
+        <div class="gloss-term">Hallmark</div>
+        <div class="gloss-def">A word or phrase in ❧these marks☙ inside a Sentence — a placeholder for something specific to your character. A weapon, a ship, a companion, a deity. You name it during character creation.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Orphan Vessel</div>
+        <div class="gloss-def">A ship or vehicle without a registered owner — salvaged, stolen, or inherited. Several Sojourn classes have one as a Hallmark. Give it a name. No stats needed.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">The Drift</div>
+        <div class="gloss-def">The strange space between the moons. Not quite real. Some classes can navigate it; most treat it as a hazard. Ask the GM what it looks like in your campaign.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Ephemera</div>
+        <div class="gloss-def">Objects your character carries that are useful but limited — vials, forged papers, calling cards. Unlike Sentences, Ephemera can be used up or lost. Your Class describes what your character tends to carry.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Moon Sentence</div>
+        <div class="gloss-def">A Sentence that's true about the current location — established by the GM or a player spending a Token. You can invoke one as a Means in a Conflict.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Impulse</div>
+        <div class="gloss-def">Your Sphere's recurring instinct. Act on it during a Conflict and your Token recharges — win or lose. It's printed in your Sphere's entry in the book.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Sympathetica</div>
+        <div class="gloss-def">Objects tied to greater forces through a pact — specific to the Synecdochist class. Each one powers a Sentence. When a Sentence Realizes, one Sympathetica is crossed out.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──
+
+const Q = [
+  {
+    id: 'instinct',
+    options: [
+      { id: 'violence',   label: 'A weapon or their body',       desc: 'Fighting, threatening, breaking through. They solve problems by force or the credible threat of it.', spheres: ['Steel'] },
+      { id: 'magic',      label: 'A spell, ritual, or rite',     desc: 'The arcane, the divine, the occult. Power that operates outside ordinary cause and effect.', spheres: ['Sorcery', 'Spirit'] },
+      { id: 'shadow',     label: 'Stealth, deception, or speed', desc: 'Getting out unseen, getting in unseen, doing what needs doing without anyone knowing it was them.', spheres: ['Shadow'] },
+      { id: 'movement',   label: 'Going somewhere no one else goes', desc: 'Exploration, escape, navigation. They know places, routes, people in other places.', spheres: ['Sojourn'] },
+      { id: 'knowledge',  label: 'What they know or can build',  desc: 'Expertise, tools, technique. They understand how things work and use that to their advantage.', spheres: ['Science'] },
+      { id: 'attention',  label: 'An audience',                  desc: 'Performance, reputation, spectacle. They work best when people are watching.', spheres: ['Stagecraft'] },
+      { id: 'connection', label: 'Who they know',                desc: 'Social leverage, networks, status. They navigate people the way others navigate terrain.', spheres: ['Society'] },
+      { id: 'story',      label: 'Something ordinary',           desc: 'Sheer stubbornness, folk wisdom, a tool everyone else overlooked. They make do.', spheres: ['Stories'] },
+      { id: 'complex',    label: 'Something hard to explain',    desc: 'Layered, unusual, or mechanically distinct. They want a character that works differently from the rest.', spheres: ['Semantics'] },
+    ]
+  },
+  {
+    id: 'mode',
+    options: [
+      { id: 'direct',   label: 'Act first, ask questions later', desc: 'They move on instinct. The situation reveals itself as it unfolds.', weights: { Steel: 2, Shadow: 1, Stories: 1 } },
+      { id: 'observe',  label: 'Read the room before moving',    desc: 'They gather information. They want to understand what\'s actually happening before committing.', weights: { Sojourn: 2, Science: 2, Society: 1 } },
+      { id: 'perform',  label: 'Make an impression',             desc: 'How others perceive them matters. They shape the moment through presence.', weights: { Stagecraft: 2, Society: 1, Spirit: 1 } },
+      { id: 'ritual',   label: 'Follow a process or principle',  desc: 'They have a way of doing things. Discipline, practice, or belief structures how they move.', weights: { Spirit: 2, Sorcery: 1, Science: 1 } },
+    ]
+  },
+  {
+    id: 'source',
+    options: [
+      { id: 'body',      label: 'Physical ability or training',  desc: 'What their body can do. Speed, strength, endurance, precision.', weights: { Steel: 2, Shadow: 1, Stories: 1 } },
+      { id: 'knowledge', label: 'Expertise and study',           desc: 'What they\'ve learned. Books, experience, technique, theory.', weights: { Science: 2, Sorcery: 1, Society: 1 } },
+      { id: 'faith',     label: 'Belief or devotion',            desc: 'Something they serve or trust. A deity, a doctrine, a code, a cause.', weights: { Spirit: 2, Stories: 1 } },
+      { id: 'network',   label: 'People and places',             desc: 'Who they know, where they\'ve been, what they\'re owed. Relationships as currency.', weights: { Society: 2, Sojourn: 2, Stagecraft: 1 } },
+      { id: 'instinct',  label: 'Raw talent or intuition',       desc: 'They don\'t always know why it works. It just does.', weights: { Shadow: 2, Stories: 2, Steel: 1 } },
+    ]
+  }
+];
+
+const SPHERES = {
+  Steel: {
+    impulse: 'Respond to a peaceful problem with violent Means',
+    classes: [
+      { name: 'Berserker', tagline: 'A warrior who both finds and loses themself in battle.', sentences: ['I always kill my foe.', 'I always carry an ❧unstoppable weapon☙.', 'I always learn through violence.', 'I always hurt those close to me.'] },
+      { name: 'Duelist',   tagline: 'One-on-one combatant. Precise, showy, and hard to refuse.', sentences: ['I always win a one-on-one fight.', 'I always impress those who see me in combat.', 'I always wield a ❧beautiful and distinct weapon☙.', 'I always accept a challenger.'] },
+      { name: 'Gonnist',   tagline: 'Marksmen wielding the rarest and most contemptible weapons.', sentences: ['I always fight from a safe distance.', 'I always intimidate others with my weapon.', 'I am always identified by the ❧gonne☙ I carry.', 'I always hear the voice of the trigger.'] },
+      { name: 'Juggernaut',tagline: 'Unstoppable once in motion. Opens the way for everyone else.', sentences: ['I always embody an unshakeable ❧creed☙.', 'I always open the way for others.', 'I always burst through obstacles.', 'I always make myself a target.'] },
+      { name: 'Knight',    tagline: 'Armored, mounted, and wielding their high station as much as their blade.', sentences: ['I always ride astride an imposing ❧mount☙.', 'I always wear arms most gleaming.', 'I always wield the arresting confidence of honor.', 'I always answer a challenge or insult, whether made to me or mine.'] },
+      { name: 'Oriflamme', tagline: 'Frontline leader, renowned for tactical and martial acumen alike.', sentences: ['I always lead my comrades to victory.', 'I always appear heroic in battle.', 'I always wear the ❧pristine armor☙ of my station.', 'I always pursue my grand ambition.'] },
+    ]
+  },
+  Sorcery: {
+    impulse: 'Respond to a mundane problem with magical Means',
+    classes: [
+      { name: 'Esoteric',    tagline: 'High-falutin eccentric. Tourist of the occult. Paid well for their services.', sentences: ['I always amaze with my mastery of the mystical.', 'I always bring my collection of occult ephemera.', 'I always have the ear of a potential patron.', 'I always play with forces beyond my control.'] },
+      { name: 'Fantasist',   tagline: 'Master of illusory magic. Deceives, tricks, and enchants.', sentences: ['I always misdirect or confuse my foes.', 'I always recognize a deception.', 'I always put on a good show.', 'I always dream of the Drift.'] },
+      { name: 'Pomesse',     tagline: 'Mistress of smoke. Master of shade. With a swing of a censer, the world changes.', sentences: ['I always exert my will over the atmosphere with my perfumes.', 'I always shift the truth with my smoke.', 'I always strike with the hidden edges of my pomander.', 'I always invite the uninvited with my fragrances.'] },
+      { name: 'Syzygist',   tagline: 'Attends to cosmic alignment to sense what the future will bring.', sentences: ['I always read the future in the spheres.', 'I always sense which prediction someone needs to hear.', 'I always know how to ritually align the celestial.', 'I always become lost in signs and portents.'] },
+      { name: 'Thaumaturge', tagline: 'Wizard of the great formal schools of magic.', sentences: ['I always carry my hand-curated book of grand spells.', 'I always know a few showy tricks.', 'I always project an image of unerring wisdom.', 'I always reject the use of unorthodox magic.'] },
+    ]
+  },
+  Spirit: {
+    impulse: 'Respond to an urgent problem with ritualistic Means',
+    classes: [
+      { name: 'Cultist',      tagline: 'Mystagogue of a furtive religion, leading new zealous followers into the fold.', sentences: ['I always know where to find an enclave of other "heretics."', 'I always entice others with the intensity of my belief.', 'I always enact the ritual to summon the power of my ❧deity☙.', 'I always need to worship surreptitiously.'] },
+      { name: 'Gaunt',        tagline: 'Cursed to be both death\'s emissary and custodian.', sentences: ['I always know who will die next.', 'I always exude an ominous presence.', 'I always address grief with ritual.', 'I always arrive at the wrong moment.'] },
+      { name: 'Quintessent',  tagline: 'Ghostly embodiment of a person, place, element, or concept.', sentences: ['I always force others to confront the truth.', 'I always wield ❧a spectral or elemental power☙.', 'I always frighten those who perceive me.', 'I always linger where I am not welcome.'] },
+      { name: 'Theologicant', tagline: 'Scholar of Realis\'s many faiths and the daemons between them.', sentences: ['I always know the rituals of Realis\'s many faiths.', 'I always hear the whispers of countless daemons.', 'I always make the presence of the divine felt among others.', 'I always doubt.'] },
+      { name: 'Witch',        tagline: 'Wicker and word. Blood and blade. For generations.', sentences: ['I always know the old words of control.', 'I always trade blood for shape.', 'I always hide my shelter.', 'I always let the nature of Realis take control.'] },
+    ]
+  },
+  Shadow: {
+    impulse: 'Respond to a noble problem with dishonorable Means',
+    classes: [
+      { name: 'Blackguard',    tagline: 'Stalks in silence, kills in secret, does both for profit.', sentences: ['I always get the drop on my target.', 'I always coat my blade with a useful poison.', 'I always disappear into the dark.', 'I always find a well-paying job.'] },
+      { name: 'Cadekin',       tagline: 'An orphaned hunter and their beast of prey, drawn together in the wild.', sentences: ['I always track down my prey.', 'I always hit my mark.', 'I always hunt alongside my ❧loyal companion☙.', 'I always act rashly when alone.'] },
+      { name: 'Misericorde',   tagline: 'Part lay-clergy, part nurse, part killer.', sentences: ['I always provide thorough care.', 'I always wield the slender tools of mercy.', 'I always wear the Black Vestment.', 'I always demand mercy be given to others.'] },
+      { name: 'Runner',        tagline: 'Transporter, smuggler, courier. Always moving.', sentences: ['I always have a solid alibi.', 'I always keep my cargo hidden.', 'I always unveil a concealed weapon.', 'I always pilot my ❧Orphan Vessel☙ towards trouble.'] },
+      { name: 'Skulduggerist', tagline: 'Cutpurse, housebreaker, thief, and mover-in-shadow.', sentences: ['I always open locks in my way.', 'I always have the right tool for the job.', 'I always keep a hidden blade on me.', 'I always leave a ❧calling card☙.'] },
+    ]
+  },
+  Sojourn: {
+    impulse: 'Respond to a local problem with excursionary Means',
+    classes: [
+      { name: 'Curioste',   tagline: 'Antiquarian, merchant, cabinet-keeper.', sentences: ['I always find the most valuable thing.', 'I always get a good price.', 'I always weave a memorable story.', 'I always acquire more than I can carry.'] },
+      { name: 'Kestrel',   tagline: 'Kitebound scout who glides on the aetherflows.', sentences: ['I always use my ❧glider☙ to reach places no one else can.', 'I always have the upper hand on those below me.', 'I always find a friend among those that fly.', 'I always dive too quickly.'] },
+      { name: 'Liminalist',tagline: 'Showy and expensive guide of the Drift.', sentences: ['I always escape pursuers.', 'I always know how to enter or leave the Drift.', 'I always guide others to emotional extremes.', 'I always bear the Drift\'s strange ❧mark☙.'] },
+      { name: 'Newshound', tagline: 'Gonzo writer eager to tell hidden truths, so long as they\'re credited with the telling.', sentences: ['I always get the scoop.', 'I always slip past the perimeter.', 'I always communicate in compelling ways.', 'I always attach my name to my story.'] },
+      { name: 'Peregrine', tagline: 'Knight-errant driven by wanderlust and a desire to find the right cause.', sentences: ['I always wear the distinguished ❧arms☙ of my past service.', 'I always call on old allies.', 'I always have the determination to continue.', 'I always leave eventually.'] },
+      { name: 'Xenagogue', tagline: 'Showy tour guide from a long legacy of navigators and messengers.', sentences: ['I always pilot my ❧Orphan Vessel☙ with great skill.', 'I always find the way through or around.', 'I always have the right map, somewhere.', 'I always announce my presence with unmistakable flair.'] },
+    ]
+  },
+  Science: {
+    impulse: 'Respond to an intuitive problem with technical Means',
+    classes: [
+      { name: 'Alchemist',  tagline: 'Master of phials, unguents, and petty transmutations. Perhaps, one day, more.', sentences: ['I always cure my patient.', 'I always carry a satchel of alchemical supplies.', 'I always identify an object\'s material composition.', 'I always experiment on others.'] },
+      { name: 'Auricle',   tagline: 'Sonic sociologist and listener-prophet.', sentences: ['I always hear the future coming.', 'I always wear the prestigious ❧earpiece☙ of my vocation.', 'I always recognize the sound of a lie.', 'I always hear more than I want to.'] },
+      { name: 'Fixit',     tagline: 'Practical mechanic and shrewd tinkerer.', sentences: ['I always fix what\'s broken.', 'I always lug around my tool kit.', 'I always defuse explosive situations.', 'I always listen to a machine\'s demands.'] },
+      { name: 'Mountebank',tagline: 'Charlatan, snake oil seller, and (occasionally) herbalist.', sentences: ['I always close the sale.', 'I always make my exit.', 'I always have a little bit of the real thing.', 'I always promise more than I can deliver.'] },
+      { name: 'Pedagogue', tagline: 'Teacher, philosopher, naturalist, lecturer.', sentences: ['I always get my point across.', 'I always know the right text to reference.', 'I always shake one\'s faith in oneself.', 'I always separate myself from those I seek to teach.'] },
+    ]
+  },
+  Stagecraft: {
+    impulse: 'Respond to a private problem through public Means',
+    classes: [
+      { name: 'Idol',      tagline: 'Beloved, showy, and influential. Dangerous and targeted for those reasons.', sentences: ['I always garner affection.', 'I always direct my followers to my ends.', 'I always wear prestigious attire.', 'I always get wrapped into the Dreams of others.'] },
+      { name: 'Jeopardist',tagline: 'Daredevil, escape artist, circus performer, and death chaser.', sentences: ['I always move my body in striking ways.', 'I always escape unharmed.', 'I always keep things balanced.', 'I always leap into danger.'] },
+      { name: 'Predicant', tagline: 'Sermonizer, evangelist, and preacher in every sense of the word.', sentences: ['I always deliver my sermon with aplomb.', 'I always leave others feeling guilty.', 'I always offer words instead of deeds.', 'I always speak when silence would serve better.'] },
+      { name: 'Stringent', tagline: 'Griot, mediator, and oral historian bound by rope and tradition.', sentences: ['I always remember what really happened back then.', 'I always know the best version of the story to tell.', 'I always voice the rhythm of the future.', 'I always hold others to their word.'] },
+      { name: 'Virtuoso',  tagline: 'A source of the exquisite, or someone who adds luster to the mundane.', sentences: ['I always impress others with my ❧craft☙.', 'I always draw an audience.', 'I always know the right medium to use.', 'I always provoke jealousy.'] },
+      { name: 'Zanni',     tagline: 'The jester, the clown, the torrid juggler.', sentences: ['I always bring joy with my antics.', 'I always reveal the truth.', 'I always anger the powerful.', 'I always go too far.'] },
+    ]
+  },
+  Society: {
+    impulse: 'Respond to a material problem through social Means',
+    classes: [
+      { name: 'Aureate',    tagline: 'Final scion of a dying line.', sentences: ['I always exude the golden aura of a grand past.', 'I always know someone who owed my family a favor.', 'I always rely on my ❧heirloom☙ as both a tool and symbol.', 'I always overextend myself to keep up appearances.'] },
+      { name: 'Heritor',    tagline: 'However old, still principally known as the child of a high-ranking noble.', sentences: ['I always travel with a skilled ❧bodyguard☙.', 'I always move with the athleticism earned from a life of privilege.', 'I always have the wealth of my inheritance.', 'I always live in the shadow of my lineage.'] },
+      { name: 'Knave',      tagline: 'Scoundrel, layabout, worldly traveler.', sentences: ['I always know the passphrase.', 'I always wear the right outfit.', 'I always keep a little dagger on my belt.', 'I always leave a lasting impression.'] },
+      { name: 'Questionist',tagline: 'Mystery solver. Detective. Expert at ratiocination.', sentences: ['I always uncover the truth.', 'I always fluster a liar.', 'I always carry a small, but fashionable ❧weapon☙.', 'I always suspect everyone of guilt.'] },
+      { name: 'Valet',      tagline: 'Chief servant for a noble, or someone using power to pretend to be.', sentences: ['I always speak with the voice of my ❧master☙.', 'I always see through the pretenses of the powerful.', 'I always know a way into a house of means.', 'I always do what is asked of me.'] },
+      { name: 'Yeoman',     tagline: 'Adjutant, aide-de-camp, military staff officer. Mid-level attendant with a sword.', sentences: ['I always carry our ❧commander\'s☙ authority.', 'I always have the supplies others need.', 'I always project my temperament onto the battlefield.', 'I always feel the weight of the military on my back.'] },
+    ]
+  },
+  Stories: {
+    impulse: 'Respond to an epic problem with everyday Means',
+    classes: [
+      { name: 'Fairy',      tagline: 'Good-humored companion with a heart as large as their body is small.', sentences: ['I always escape dangerous situations.', 'I always console those in distress.', 'I always heal those who\'ve been harmed.', 'I always underestimate what I\'m getting into.'] },
+      { name: 'Goodfisher', tagline: 'Angler, farmer, carpenter — someone who does the daily work of the moons.', sentences: ['I always put in an honest day\'s work.', 'I always find a simple but effective solution.', 'I always remind people of their origins.', 'I always struggle against ❧my roots☙.'] },
+      { name: 'Kid',        tagline: 'A plucky scamp. The world\'s crawling with them, but this one\'s different.', sentences: ['I always slip away unharmed.', 'I always see things differently than adults.', 'I always have a trick up my sleeve.', 'I always get in over my head.'] },
+      { name: 'Oriser',     tagline: 'Pilgrim, penitent, proselyte.', sentences: ['I always find refuge among other believers.', 'I always endure through hazardous territory.', 'I always see a miracle in the mundane.', 'I always judge or am judged by those who do not believe.'] },
+      { name: 'Struggler',  tagline: 'Closer to death than anyone, and thus better at escaping it.', sentences: ['I always fight my way to safety.', 'I always find somewhere to rest.', 'I always protect those traveling with me.', 'I always seem to be under threat.'] },
+      { name: 'Testudine',  tagline: 'Living bulwark, shield, warden. Has mastered their shell.', sentences: ['I always move with utmost care.', 'I always understand practical matters.', 'I always protect others with ❧shield☙ and shell.', 'I always move slower than others would like.'] },
+    ]
+  },
+  Semantics: {
+    impulse: 'Respond to a simple problem with complex Means',
+    warn: true,
+    classes: [
+      { name: 'Eikonthrope',   tagline: 'Mortal host bonded with a spirit. Runs two character sheets. Involuntarily transforms.', sentences: ['I always keep a low profile. (Host)', 'I always defend my territory. (Eikon)', 'I always track down my prey. (Eikon)', 'I always involuntarily transform when struck by my ❧catalyst☙.'] },
+      { name: 'Synecdochist',  tagline: 'Channels power through Sympathetica — objects tied to greater forces via pact.', sentences: ['With ❧Sympathetica A☙, I always…', 'With ❧Sympathetica B☙, I always…', 'With ❧Sympathetica C☙, I always…', 'I vowed that whenever I Realize a Sentence, I must cross out one Sympathetica.'] },
+      { name: 'Flaneur',       tagline: 'Wandering observer. Gains insight through detachment and careful watching.', sentences: ['I always notice what others miss.', 'I always know the city\'s hidden flows.', 'I always find the right vantage point.', 'I always keep my distance.'] },
+      { name: 'Impostor',      tagline: 'Identity thief. Can borrow the Sentences of other characters.', sentences: ['I always wear the face I need.', 'I always know what someone wants to hear.', 'I always find a way inside.', 'I always leave behind a question about who I really am.'] },
+      { name: 'Panoplist',     tagline: 'Collector and amasser. Power through accumulation of resources and leverage.', sentences: ['I always have what others need.', 'I always know who owes what to whom.', 'I always find something worth keeping.', 'I always want more than I should.'] },
+    ]
+  },
+};
+
+// ── STATE ──
+let answers = [null, null, null];
+let currentStep = 0;
+
+// ── SCORING ──
+function score(answers) {
+  const scores = {};
+  Object.keys(SPHERES).forEach(s => scores[s] = 0);
+
+  // Q1: instinct → primary sphere mapping
+  const instinct = answers[0];
+  if (instinct) {
+    const q1opt = Q[0].options.find(o => o.id === instinct);
+    if (q1opt) q1opt.spheres.forEach(s => { scores[s] = (scores[s] || 0) + 4; });
+  }
+
+  // Q2 & Q3: weights
+  [answers[1], answers[2]].forEach((ans, qi) => {
+    if (!ans) return;
+    const opt = Q[qi + 1].options.find(o => o.id === ans);
+    if (opt && opt.weights) {
+      Object.entries(opt.weights).forEach(([s, w]) => { scores[s] = (scores[s] || 0) + w; });
+    }
+  });
+
+  return scores;
+}
+
+function topClasses(answers, n = 3) {
+  const scores = score(answers);
+  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const results = [];
+  for (const [sphere] of ranked) {
+    if (results.length >= n) break;
+    if (scores[sphere] === 0) continue;
+    const s = SPHERES[sphere];
+    // pick first 2 classes per sphere, up to n total
+    s.classes.slice(0, 2).forEach(cls => {
+      if (results.length < n) results.push({ ...cls, sphere, highlight: results.length === 0 });
+    });
+  }
+  return results;
+}
+
+// ── RENDER ──
+function renderOptions(stepIdx) {
+  const container = document.getElementById(`opts${stepIdx}`);
+  container.innerHTML = '';
+  Q[stepIdx].options.forEach(opt => {
+    const el = document.createElement('button');
+    el.className = 'opt' + (answers[stepIdx] === opt.id ? ' selected' : '');
+    el.innerHTML = `<div class="opt-name">${opt.label}</div><div class="opt-desc">${opt.desc}</div>`;
+    el.onclick = () => {
+      answers[stepIdx] = opt.id;
+      container.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById(`next${stepIdx}`).disabled = false;
+    };
+    container.appendChild(el);
+  });
+}
+
+function renderResults() {
+  const classes = topClasses(answers);
+  const list = document.getElementById('class-list');
+  list.innerHTML = '';
+  classes.forEach(cls => {
+    const card = document.createElement('div');
+    card.className = 'class-card' + (cls.highlight ? ' highlight' : '');
+    const sentences = cls.sentences.map((s, i) =>
+      `<div class="class-sentence${i === 3 ? ' flaw' : ''}">${s}</div>`
+    ).join('');
+    card.innerHTML = `
+      <div class="class-card-top">
+        <div class="class-card-name">${cls.name}</div>
+        <div class="class-card-sphere">Sphere of ${cls.sphere}</div>
+      </div>
+      <div class="class-card-tagline">${cls.tagline}</div>
+      <div class="class-sentences">${sentences}</div>
+      <div class="class-card-footer">
+        <button class="btn-pick" onclick="copyPick('${cls.name}', '${cls.sphere}', this)">Copy my pick</button>
+        <span class="copy-msg" id="msg-${cls.name.replace(/\s/g,'')}">Copied to clipboard</span>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  // build browse tabs
+  const tabsEl = document.getElementById('sphere-tabs');
+  const panelsEl = document.getElementById('sphere-panels');
+  tabsEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+  Object.entries(SPHERES).forEach(([name, sphere]) => {
+    const tab = document.createElement('button');
+    tab.className = 'sphere-tab';
+    tab.textContent = name;
+    tab.onclick = () => toggleSphere(name, tab);
+    tabsEl.appendChild(tab);
+
+    const panel = document.createElement('div');
+    panel.className = 'sphere-classes';
+    panel.id = `browse-${name}`;
+    if (sphere.warn) {
+      panel.innerHTML = `<div style="font-size:0.72rem;color:var(--danger);padding:0.5em 0.8em;border:1px solid var(--danger);border-radius:4px;background:rgba(196,122,122,0.07);margin-bottom:0.6rem;">These classes have extra mechanical complexity. Worth avoiding for your first character.</div>`;
+    }
+    sphere.classes.forEach(cls => {
+      const sents = cls.sentences.map((s, i) =>
+        `<div class="class-sentence${i === 3 ? ' flaw' : ''}">${s}</div>`
+      ).join('');
+      panel.innerHTML += `
+        <div class="class-card">
+          <div class="class-card-top">
+            <div class="class-card-name">${cls.name}</div>
+            <div class="class-card-sphere">Sphere of ${name}</div>
+          </div>
+          <div class="class-card-tagline">${cls.tagline}</div>
+          <div class="class-sentences">${sents}</div>
+          <div class="class-card-footer">
+            <button class="btn-pick" onclick="copyPick('${cls.name}', '${name}', this)">Copy my pick</button>
+            <span class="copy-msg" id="msg-browse-${cls.name.replace(/\s/g,'')}">Copied</span>
+          </div>
+        </div>
+      `;
+      panelsEl.appendChild(panel);
+    });
+    panelsEl.appendChild(panel);
+  });
+}
+
+function copyPick(name, sphere, btn) {
+  const text = `Class: ${name} (Sphere of ${sphere})`;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const msgId = btn.nextElementSibling.id;
+  const msg = document.getElementById(msgId);
+  if (msg) { msg.classList.add('show'); setTimeout(() => msg.classList.remove('show'), 2000); }
+}
+
+let activeSphere = null;
+function toggleSphere(name, tab) {
+  if (activeSphere === name) {
+    document.getElementById(`browse-${name}`).classList.remove('open');
+    tab.classList.remove('active');
+    activeSphere = null;
+    return;
+  }
+  if (activeSphere) {
+    document.getElementById(`browse-${activeSphere}`).classList.remove('open');
+    document.querySelectorAll('.sphere-tab').forEach(t => t.classList.remove('active'));
+  }
+  document.getElementById(`browse-${name}`).classList.open = false;
+  document.getElementById(`browse-${name}`).classList.add('open');
+  tab.classList.add('active');
+  activeSphere = name;
+}
+
+function toggleBrowse() {
+  const tabs = document.getElementById('sphere-tabs');
+  tabs.classList.toggle('open');
+}
+
+// ── NAV ──
+function updatePips(step) {
+  for (let i = 0; i < 3; i++) {
+    const pip = document.getElementById(`pip${i}`);
+    pip.className = 'pip' + (i < step ? ' done' : i === step ? ' active' : '');
+  }
+}
+
+function next(step) {
+  document.getElementById(`step${step}`).classList.remove('active');
+  if (step < 2) {
+    currentStep = step + 1;
+    document.getElementById(`step${currentStep}`).classList.add('active');
+    renderOptions(currentStep);
+    updatePips(currentStep);
+    if (answers[currentStep] !== null) {
+      document.getElementById(`next${currentStep}`).disabled = false;
+    }
+  }
+}
+
+function back(step) {
+  document.getElementById(`step${step}`).classList.remove('active');
+  currentStep = step - 1;
+  document.getElementById(`step${currentStep}`).classList.add('active');
+  updatePips(currentStep);
+}
+
+function showResults() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('results').classList.add('active');
+  renderResults();
+}
+
+function restart() {
+  answers = [null, null, null];
+  currentStep = 0;
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('step0').classList.add('active');
+  renderOptions(0);
+  updatePips(0);
+  document.getElementById('next0').disabled = true;
+  document.getElementById('sphere-tabs').classList.remove('open');
+  if (activeSphere) {
+    document.getElementById(`browse-${activeSphere}`).classList.remove('open');
+    activeSphere = null;
+  }
+}
+
+// ── INIT ──
+renderOptions(0);
+</script>
+</body>
+</html>

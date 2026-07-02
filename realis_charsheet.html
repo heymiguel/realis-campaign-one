@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realis — Building Maren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0D0D14; --card: #1E1C2E; --border: #2E2B45;
+  --text: #C4B8D4; --text-dim: #7A7295;
+  --accent: #E8C547; --accent-dim: #9E8A32; --white: #F0EBF8;
+  --flaw: rgba(196,122,122,0.12); --flaw-border: rgba(196,122,122,0.35);
+}
+html { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); font-size: 16px; }
+
+.deck { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide {
+  height: 100vh; width: 100%; scroll-snap-align: start; scroll-snap-stop: always;
+  display: flex; align-items: center; background: var(--bg);
+  position: relative; overflow: hidden;
+}
+.slide-top { align-items: flex-start; }
+.slide-top .slide-inner { padding-top: 3vh; padding-bottom: 3vh; }
+
+.slide-inner { width: 100%; max-width: 820px; margin: 0 auto; padding: 0 5vw; }
+
+.stars { position: absolute; inset: 0; pointer-events: none; }
+.star  { position: absolute; border-radius: 50%; background: white; }
+.corpse-sun {
+  position: absolute; top: -10vw; right: -10vw; width: 32vw; height: 32vw;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #F5E070, #E8C547 30%, #B8860B 60%, #3D2800 85%, transparent);
+  opacity: 0.2; filter: blur(3px);
+}
+
+h1 { font-family: 'Crimson Pro', serif; font-size: clamp(2.2rem,5vw,3.5rem); font-weight: 600; color: var(--white); line-height: 1.1; margin-bottom: 0.3em; }
+h2 { font-family: 'Crimson Pro', serif; font-size: clamp(1.4rem,3vw,2rem); font-weight: 600; color: var(--white); line-height: 1.15; margin-bottom: 0.25em; }
+p  { font-size: clamp(0.8rem,1.3vw,0.95rem); line-height: 1.7; color: var(--text); margin-bottom: 0.6em; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--white); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+
+.eyebrow { font-size: clamp(0.55rem,0.9vw,0.68rem); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5em; }
+
+#counter { position: fixed; bottom: 1.2rem; right: 1.5rem; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.08em; z-index: 100; pointer-events: none; }
+#dots { position: fixed; right: 1.2rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s, transform 0.2s; }
+.dot.active { background: var(--accent); transform: scale(1.4); }
+
+.def-box { background: rgba(232,197,71,0.05); border: 1px solid rgba(232,197,71,0.2); border-radius: 8px; padding: 0.9rem 1.1rem; margin: 0.7rem 0; }
+.def-term { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3em; }
+.def-body { font-size: clamp(0.76rem,1.18vw,0.86rem); color: var(--text); line-height: 1.65; }
+
+.elodie-note {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.9rem 1.1rem; margin: 0.7rem 0;
+}
+.elodie-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4em; }
+.elodie-text { font-family: 'Crimson Pro', serif; font-size: clamp(0.88rem,1.35vw,1rem); color: var(--white); line-height: 1.6; }
+.elodie-aside { font-size: clamp(0.68rem,1vw,0.78rem); color: var(--text-dim); margin-top: 0.4em; line-height: 1.5; font-style: italic; }
+
+.sentence-stack { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.8rem; }
+.sentence-row {
+  display: flex; align-items: baseline; gap: 0.8rem;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.6rem 0.9rem;
+}
+.sentence-row.flaw { border-color: var(--flaw-border); background: var(--flaw); }
+.rank { font-family: 'Crimson Pro', serif; font-size: 1.1rem; font-weight: 600; color: var(--accent); min-width: 2.2em; flex-shrink: 0; }
+.rank.flaw { color: #c47a7a; }
+.sentence-text { font-family: 'Crimson Pro', serif; font-style: italic; font-size: clamp(0.85rem,1.3vw,0.98rem); color: var(--white); line-height: 1.4; flex: 1; }
+.sentence-text.flaw { color: var(--text); }
+.flaw-tag { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #c47a7a; padding: 2px 5px; border: 1px solid #c47a7a44; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+.sentence-note { font-size: clamp(0.6rem,0.88vw,0.7rem); color: var(--text-dim); flex-shrink: 0; padding-left: 0.8em; text-align: right; max-width: 14em; line-height: 1.4; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.8rem; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin-top: 0.8rem; }
+
+.sheet-preview {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1.1rem 1.3rem; margin-top: 0.8rem;
+  font-family: 'Crimson Pro', serif; font-size: clamp(0.82rem,1.25vw,0.92rem);
+  line-height: 1.8; color: var(--text);
+}
+.sheet-preview .sp-head { color: var(--white); font-weight: 600; font-size: clamp(1rem,1.6vw,1.2rem); margin-bottom: 0.15em; }
+.sheet-preview .sp-sub  { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.8em; }
+.sheet-preview .sp-section { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-dim); margin: 0.8em 0 0.3em; }
+.sheet-preview .sp-line { font-style: italic; margin-bottom: 0.15em; }
+.sheet-preview .sp-flaw { color: var(--text-dim); }
+.sheet-preview .sp-dim  { color: var(--text-dim); }
+.sheet-preview .sp-strike { text-decoration: line-through; color: var(--text-dim); }
+
+.marks-row { display: flex; gap: 4px; align-items: center; margin-top: 0.3em; }
+.mk { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--text-dim); }
+.mk.filled { background: var(--accent); border-color: var(--accent); }
+
+.token-demo {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--border); font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-dim);
+  vertical-align: middle; margin-right: 0.5rem;
+}
+
+.close-lines { font-family: 'Crimson Pro', serif; font-size: clamp(1.6rem,3.5vw,2.8rem); font-weight: 600; color: var(--white); line-height: 1.25; margin-bottom: 1em; }
+.close-lines em { color: var(--accent); font-style: normal; }
+.tagline { font-family: 'Crimson Pro', serif; font-style: italic; font-size: clamp(0.9rem,1.5vw,1.1rem); color: var(--text-dim); margin-top: 1.5em; }
+
+.breadcrumb { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 1.2rem; }
+.breadcrumb a { color: var(--text-dim); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1. TITLE -->
+<section class="slide" id="s1">
+  <div class="stars" id="stars1"></div>
+  <div class="corpse-sun"></div>
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Realis · Character Sheet Walkthrough</div>
+    <h1>Building Maren.</h1>
+    <p>Elodie is building her first Realis character. We're going to watch her do it — section by section, with notes on what each part means and why she made the choices she did.</p>
+    <p>By the end you'll know how to fill out your own sheet. The fillable PDF is linked in <strong>#realis-announcements</strong> — this is just the explainer.</p>
+    <p style="font-size:0.75rem;color:var(--text-dim);margin-top:1.5rem;">Scroll or use arrow keys to move between slides.</p>
+  </div>
+</section>
+
+<!-- 2. CLASS -->
+<section class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 1 — Pick a Class</div>
+    <h2>Elodie picks Xenagogue.</h2>
+    <p>The Xenagogue is a showy tour guide and courier from a long legacy of navigators and messengers — someone who always knows the way through, and always makes an entrance.</p>
+    <p>Elodie wanted to play a pilot. Someone who moves between moons for a living, has a ship with a name, and announces themselves before they've even docked. Xenagogue in the <strong>Sphere of Sojourn</strong> fit immediately.</p>
+
+    <div class="def-box">
+      <div class="def-term">Sphere of Sojourn — Impulse</div>
+      <div class="def-body">Respond to a local problem with excursionary Means. Elodie's Token recharges whenever Maren solves something by going somewhere, finding a route, or invoking her history as a traveler — win or lose.</div>
+    </div>
+
+    <div class="elodie-note">
+      <div class="elodie-label">Elodie's reasoning</div>
+      <div class="elodie-text">"I like that the Impulse recharges my Token for doing exactly what the character would do anyway. I'm not playing against my instincts to get a resource back."</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. NAME -->
+<section class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 2 — Name and Basics</div>
+    <h2>The character has a name.</h2>
+    <p>Name, pronouns, a line or two of context. Elodie keeps it short — Realis characters reveal themselves through play, not backstory documents.</p>
+
+    <div class="sheet-preview">
+      <div class="sp-head">Maren</div>
+      <div class="sp-sub">she/her · Xenagogue · Sphere of Sojourn</div>
+      <div class="sp-line sp-dim" style="font-size:0.85rem;">A courier who's been running the same route between Vellum-Secundus and the Outer Shelf for six years. She knows every checkpoint, every shortcut, and every face that shouldn't be there. She stopped asking what's in the cargo three jobs ago.</div>
+    </div>
+
+    <div class="elodie-note" style="margin-top:0.8rem;">
+      <div class="elodie-label">Elodie's reasoning</div>
+      <div class="elodie-text">"Two sentences. She has a history, a specific route, and already a hint of something morally complicated. That's enough to start."</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. SENTENCES EXPLAINED -->
+<section class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Before the sheet</div>
+    <h2>What is a Sentence?</h2>
+    <p>A Sentence is a bold statement of what your character can <em>always</em> do. Your Class gives you four. They're the only mechanic that matters — when you want something uncertain to happen, you name a Sentence and use it.</p>
+
+    <div class="def-box">
+      <div class="def-term">Reality Rank (+0 to +3)</div>
+      <div class="def-body">Every Sentence has a rank. Higher rank wins in a Conflict. All four start at +0. Ties go to whoever is <em>defending</em> — so at +0, you lose every tie as the one acting. This is by design. Losing is how you grow.</div>
+    </div>
+    <div class="def-box">
+      <div class="def-term">Countered</div>
+      <div class="def-body">Lose a Conflict with a Sentence and it's Countered for the rest of the scene. Cross it out — you can't use it again until the scene changes. That's also a mark on the Sentence.</div>
+    </div>
+    <div class="def-box">
+      <div class="def-term">Primed → Realization</div>
+      <div class="def-body">Three marks = Primed. You can then Realize it: rank goes up by 1, and you add a limiting condition to the text. The Sentence becomes stronger and more specific to your story.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. CLASS SENTENCES -->
+<section class="slide slide-top" id="s5">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 3 — Class Sentences</div>
+    <h2>Maren's four Sentences.</h2>
+    <p>Copied from the Xenagogue entry. All start at +0. The fourth is a flaw — it can be used against her, but leaning into it deliberately can recharge her Token.</p>
+    <div class="sentence-stack">
+      <div class="sentence-row">
+        <div class="rank">+0</div>
+        <div class="sentence-text">I always pilot my ❧Orphan Vessel☙ with great skill.</div>
+        <div class="sentence-note">Hallmark to name — see next slide.</div>
+      </div>
+      <div class="sentence-row">
+        <div class="rank">+0</div>
+        <div class="sentence-text">I always find the way through or around.</div>
+        <div class="sentence-note">Navigation, escape, shortcuts.</div>
+      </div>
+      <div class="sentence-row">
+        <div class="rank">+0</div>
+        <div class="sentence-text">I always have the right map, somewhere.</div>
+        <div class="sentence-note">Broad. Flexible. Will narrow as it Realizes.</div>
+      </div>
+      <div class="sentence-row flaw">
+        <div class="rank flaw">+0</div>
+        <div class="sentence-text flaw">I always announce my presence with unmistakable flair.</div>
+        <span class="flaw-tag">flaw</span>
+      </div>
+    </div>
+    <div class="elodie-note" style="margin-top:0.7rem;">
+      <div class="elodie-label">On the flaw</div>
+      <div class="elodie-text">"The flaw is actually great — it tells me who Maren is. She can't help herself. She always makes an entrance, even when stealth would serve her better."</div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. HALLMARKS -->
+<section class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 4 — Hallmarks</div>
+    <h2>Naming the ship.</h2>
+
+    <div class="def-box">
+      <div class="def-term">Hallmark</div>
+      <div class="def-body">Words wrapped in ❧these marks☙ in a Sentence are Hallmarks — placeholders for something specific to your character. Give each one a concrete name. It's free worldbuilding and it makes the Sentence yours.</div>
+    </div>
+
+    <div class="def-box">
+      <div class="def-term">Orphan Vessel</div>
+      <div class="def-body">A ship or vehicle without a registered owner — salvaged, stolen, or inherited. Several Sojourn classes have one. Give it a name and a rough shape. No stats needed.</div>
+    </div>
+
+    <p>Maren's first Sentence reads: <em>I always pilot my ❧Orphan Vessel☙ with great skill.</em></p>
+
+    <div class="elodie-note">
+      <div class="elodie-label">Elodie names the Hallmark</div>
+      <div class="elodie-text">❧Orphan Vessel☙ → <strong>the Pale Chord</strong></div>
+      <div class="elodie-aside">A mid-range courier vessel, wide hull, looks slower than it is. The name came with the ship. Maren hasn't changed it.</div>
+    </div>
+
+    <p style="margin-top:0.8rem;">The Sentence now reads: <em>I always pilot the Pale Chord with great skill.</em> Same mechanic, but it's a real thing in the fiction now.</p>
+  </div>
+</section>
+
+<!-- 7. DREAM -->
+<section class="slide" id="s7">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 5 — Dream</div>
+    <h2>Maren's Dream.</h2>
+
+    <div class="def-box">
+      <div class="def-term">Dream</div>
+      <div class="def-body">One Sentence. Single use, ever. Cross it off and you overcome any uncertain obstacle — even one you'd normally lose. The Xenagogue's examples are in the book. Pick one, rework it, or write your own. Once used, it's gone.</div>
+    </div>
+
+    <p>Elodie looked at the three examples and rewrote one to fit what she already knows about Maren.</p>
+
+    <div class="elodie-note">
+      <div class="elodie-label">Maren's Dream</div>
+      <div class="elodie-text">I will find out what was in that last cargo — and make sure it never moves again.</div>
+      <div class="elodie-aside">Elodie is keeping this private for now. Maren doesn't consciously know this is where she's headed. But Elodie does.</div>
+    </div>
+
+    <div class="elodie-note" style="margin-top:0.5rem;">
+      <div class="elodie-label">Elodie's reasoning</div>
+      <div class="elodie-text">"It ties directly to her backstory and gives me a compass for the whole campaign. I know roughly what the arc looks like, even if Maren doesn't."</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. IMPULSE + TOKEN -->
+<section class="slide" id="s8">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 6 — Impulse and Token</div>
+    <h2>The Token economy.</h2>
+
+    <div class="def-box">
+      <div class="def-term">Impulse</div>
+      <div class="def-body">Copied from the Sphere of Sojourn: <em>Respond to a local problem with excursionary Means.</em> When Maren solves something by going somewhere or drawing on her history as a traveler, her Token recharges — win or lose in the Conflict.</div>
+    </div>
+
+    <div class="def-box">
+      <div class="def-term">Token</div>
+      <div class="def-body">One rechargeable token. Spend before comparing ranks to boost any Means by +1. Or spend to invoke a Moon Sentence — something established as true about the current location. Start uncharged.</div>
+    </div>
+
+    <div class="sheet-preview" style="margin-top:0.8rem;">
+      <div class="sp-section">Impulse</div>
+      <div class="sp-line">Respond to a local problem with excursionary Means.</div>
+      <div class="sp-section">Token</div>
+      <div class="sp-line sp-dim">[ ] charged &nbsp;/&nbsp; [x] spent</div>
+    </div>
+
+    <div class="elodie-note" style="margin-top:0.7rem;">
+      <div class="elodie-label">Elodie's note</div>
+      <div class="elodie-text">"My flaw also recharges the Token via Tragic Success — if Maren announces herself at exactly the wrong moment and it causes problems, I get it back. I'm going to use that."</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. BONDS EXPLAINED -->
+<section class="slide" id="s9">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 7 — Bonds</div>
+    <h2>What are Bonds?</h2>
+
+    <div class="def-box">
+      <div class="def-term">Bond</div>
+      <div class="def-body">A Sentence about your relationship with another player character. Use it as a Means in a Conflict when the fiction reflects it. Two Bonds, two different people. Every use marks it. Three marks and it Realizes — both named characters recharge Tokens.</div>
+    </div>
+
+    <p>Bonds can't be written until other characters are posted. Elodie waits until she can read the other sheets, then writes toward specific people — not placeholders.</p>
+
+    <div class="two-col">
+      <div class="elodie-note">
+        <div class="elodie-label">Too vague</div>
+        <div class="elodie-text" style="color:var(--text-dim);">Cassiel and I go way back.</div>
+        <div class="elodie-aside">No point of view. Useless at the table.</div>
+      </div>
+      <div class="elodie-note">
+        <div class="elodie-label">Good</div>
+        <div class="elodie-text">Cassiel knows things about the Outer Shelf I don't — which means I need them closer than I'm comfortable with.</div>
+        <div class="elodie-aside">Specific, active, and tells you exactly when the Bond is relevant.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. BONDS WRITTEN -->
+<section class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Step 7 continued</div>
+    <h2>Maren's Bonds.</h2>
+    <p>Once the other sheets are up, Elodie reads them and writes toward specific characters.</p>
+
+    <div class="sentence-stack">
+      <div class="sentence-row">
+        <div class="rank">+0</div>
+        <div class="sentence-text">Cassiel knows things about the Outer Shelf I don't — which means I need them closer than I'm comfortable with.</div>
+      </div>
+      <div class="sentence-row">
+        <div class="rank">+0</div>
+        <div class="sentence-text">Vesper is going to get herself killed if I don't keep an eye on her. I've decided that's my problem now.</div>
+      </div>
+    </div>
+
+    <div class="marks-row" style="margin-top:0.6rem;">
+      <div class="mk"></div><div class="mk"></div><div class="mk"></div>
+      <span style="font-size:0.7rem;color:var(--text-dim);margin-left:0.4rem;">0 marks each — track them as Bonds are used in Conflicts</span>
+    </div>
+
+    <div class="elodie-note" style="margin-top:0.7rem;">
+      <div class="elodie-label">Elodie's reasoning</div>
+      <div class="elodie-text">"Both Bonds create friction, not just warmth. That's more interesting to play and more useful mechanically — I know exactly when they apply."</div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. GLOSSARY — opaque terms -->
+<section class="slide slide-top" id="s11">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Reference — Terms you'll see on sheets</div>
+    <h2>Words that need explaining.</h2>
+
+    <div class="def-box">
+      <div class="def-term">The Drift</div>
+      <div class="def-body">The strange space between the moons. Not quite real. Some classes can navigate it; most treat it as a hazard. If your Class mentions the Drift, ask the GM what it looks like in this campaign — it varies by table.</div>
+    </div>
+    <div class="def-box">
+      <div class="def-term">Orphan Vessel</div>
+      <div class="def-body">A ship or vehicle without a registered owner — salvaged, stolen, or inherited. Several classes have one as a Hallmark. Name it, give it a rough shape. No stats needed.</div>
+    </div>
+    <div class="def-box">
+      <div class="def-term">Ephemera</div>
+      <div class="def-body">Objects and resources your character carries that are useful but limited — vials, forged papers, calling cards. Unlike Sentences, Ephemera can be used up, lost, or traded. Your Class describes what kinds of things your character tends to have.</div>
+    </div>
+    <div class="def-box">
+      <div class="def-term">Moon Sentence</div>
+      <div class="def-body">A Sentence that's true about the current location — established by the GM or by a player spending a Token. Spend your Token to invoke one as a Means in a Conflict.</div>
+    </div>
+    <div class="def-box">
+      <div class="def-term">Honing</div>
+      <div class="def-body">Once per session: mark a Class Sentence, write a temporary condition in parentheses, bump its rank +1 for the session. Removed at session end. Can't Hone a Primed Sentence.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. FULL SHEET -->
+<section class="slide slide-top" id="s12">
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">The finished sheet</div>
+    <h2>Maren, complete.</h2>
+    <div class="sheet-preview">
+      <div class="sp-head">Maren</div>
+      <div class="sp-sub">she/her · Xenagogue · Sphere of Sojourn</div>
+      <div class="sp-line sp-dim" style="font-size:0.82rem; margin-bottom:0.6em;">A courier who's been running the same route between Vellum-Secundus and the Outer Shelf for six years. She knows every checkpoint, every shortcut, and every face that shouldn't be there. She stopped asking what's in the cargo three jobs ago.</div>
+
+      <div class="sp-section">Class Sentences</div>
+      <div class="sp-line">+0 · I always pilot the Pale Chord with great skill.</div>
+      <div class="sp-line">+0 · I always find the way through or around.</div>
+      <div class="sp-line">+0 · I always have the right map, somewhere.</div>
+      <div class="sp-line sp-flaw">+0 · I always announce my presence with unmistakable flair. <span style="font-size:0.6rem;color:#c47a7a;border:1px solid #c47a7a44;padding:1px 4px;border-radius:3px;letter-spacing:0.08em;text-transform:uppercase;vertical-align:middle;">flaw</span></div>
+
+      <div class="sp-section">Hallmarks</div>
+      <div class="sp-line">Orphan Vessel → the Pale Chord</div>
+
+      <div class="sp-section">Bonds</div>
+      <div class="sp-line">Bond with <strong>Cassiel</strong>: +0 · Cassiel knows things about the Outer Shelf I don't — which means I need them closer than I'm comfortable with. <span class="sp-dim">(0 marks)</span></div>
+      <div class="sp-line">Bond with <strong>Vesper</strong>: +0 · Vesper is going to get herself killed if I don't keep an eye on her. I've decided that's my problem now. <span class="sp-dim">(0 marks)</span></div>
+
+      <div class="sp-section">Dream</div>
+      <div class="sp-line">I will find out what was in that last cargo — and make sure it never moves again.</div>
+
+      <div class="sp-section">Impulse</div>
+      <div class="sp-line">Respond to a local problem with excursionary Means.</div>
+
+      <div class="sp-section">Token</div>
+      <div class="sp-line sp-dim">[ ] charged &nbsp;/&nbsp; [x] spent</div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. CLOSE -->
+<section class="slide" id="s13">
+  <div class="stars" id="stars2"></div>
+  <div class="corpse-sun" style="opacity:0.15;top:-8vw;left:-8vw;right:auto;"></div>
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Sheet Walkthrough</div>
+    <div class="eyebrow">Done</div>
+    <div class="close-lines">
+      Fill out your sheet.<br>
+      Post it in<br>
+      <em>#realis-characters</em>.<br>
+      Then write your Bonds.
+    </div>
+    <div class="tagline">The Pale Chord isn't going anywhere. Neither is the Band.</div>
+  </div>
+</section>
+
+</div>
+<div id="counter">1 / 13</div>
+<div id="dots"></div>
+
+<script>
+const deck   = document.getElementById('deck');
+const slides = Array.from(document.querySelectorAll('.slide'));
+const counter = document.getElementById('counter');
+const dotsEl  = document.getElementById('dots');
+
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+});
+const dots = Array.from(dotsEl.querySelectorAll('.dot'));
+
+function currentIndex() { return Math.round(deck.scrollTop / deck.clientHeight); }
+function goTo(i) { deck.scrollTo({ top: i * deck.clientHeight, behavior: 'smooth' }); }
+function update() {
+  const i = currentIndex();
+  counter.textContent = (i + 1) + ' / ' + slides.length;
+  dots.forEach((d, j) => d.classList.toggle('active', j === i));
+}
+deck.addEventListener('scroll', update, { passive: true });
+document.addEventListener('keydown', e => {
+  const i = currentIndex();
+  if (e.key==='ArrowDown'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();goTo(Math.min(i+1,slides.length-1));}
+  if (e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();goTo(Math.max(i-1,0));}
+});
+
+function makeStars(id, n) {
+  const c = document.getElementById(id); if (!c) return;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('div'); s.className = 'star';
+    const sz = Math.random()*2.2+0.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${(Math.random()*0.6+0.1).toFixed(2)}`;
+    c.appendChild(s);
+  }
+}
+makeStars('stars1',100); makeStars('stars2',70);
+</script>
+</body>
+</html>

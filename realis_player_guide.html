@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realis — Player Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0D0D14;
+  --card:      #1E1C2E;
+  --border:    #2E2B45;
+  --text:      #C4B8D4;
+  --text-dim:  #7A7295;
+  --accent:    #E8C547;
+  --accent-dim:#9E8A32;
+  --white:     #F0EBF8;
+}
+
+html { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); font-size: 16px; }
+
+.deck {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.slide {
+  height: 100vh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+}
+
+#s7 {
+  align-items: flex-start;
+  padding-top: 3vh;
+}
+
+#s7 .slide-inner {
+  height: calc(100vh - 6vh);
+  display: flex;
+  flex-direction: column;
+}
+
+#s7 .spheres-layout {
+  flex: 1;
+  min-height: 0;
+}
+
+.slide-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 5vw;
+}
+
+h1 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.3em;
+}
+h2 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.3em;
+}
+p {
+  font-size: clamp(0.8rem, 1.3vw, 1rem);
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 0.6em;
+}
+p:last-child { margin-bottom: 0; }
+strong { color: var(--white); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+
+.eyebrow {
+  font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5em;
+}
+
+#counter {
+  position: fixed;
+  bottom: 1.2rem;
+  right: 1.5rem;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  z-index: 100;
+  pointer-events: none;
+}
+
+#dots {
+  position: fixed;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.dot.active { background: var(--accent); transform: scale(1.4); }
+
+.stars { position: absolute; inset: 0; pointer-events: none; }
+.star  { position: absolute; border-radius: 50%; background: white; }
+.corpse-sun {
+  position: absolute;
+  top: -10vw; right: -10vw;
+  width: 32vw; height: 32vw;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #F5E070, #E8C547 30%, #B8860B 60%, #3D2800 85%, transparent);
+  opacity: 0.25;
+  filter: blur(3px);
+}
+
+/* ── TITLE ── */
+.slide-title { align-items: flex-end; }
+.slide-title .slide-inner { padding-bottom: 6vh; padding-top: 10vh; align-self: flex-end; }
+.title-subtitle {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  font-style: italic;
+  color: var(--text-dim);
+  margin-top: 0.4em;
+}
+.title-byline {
+  font-size: clamp(0.6rem, 1vw, 0.75rem);
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  margin-top: 2em;
+}
+
+/* ── TWO COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-top: 1em; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; margin-top: 1em; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.8em, 1.5vw, 1.2em);
+}
+.card-label {
+  font-size: clamp(0.55rem, 0.85vw, 0.68rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.5em;
+}
+.card-title {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.3em;
+}
+.card p { font-size: clamp(0.72rem, 1.1vw, 0.85rem); }
+
+/* ── SENTENCE DISPLAY ── */
+.sentence-stack { display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.9em; }
+.sentence-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1em;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.7em 1em;
+}
+.rank {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 2.4em;
+  flex-shrink: 0;
+}
+.sentence-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(0.88rem, 1.4vw, 1.05rem);
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.4;
+  flex: 1;
+}
+.sentence-note {
+  font-size: clamp(0.6rem, 0.88vw, 0.7rem);
+  color: var(--text-dim);
+  flex-shrink: 0;
+  padding-left: 1em;
+  text-align: right;
+  max-width: 16em;
+  line-height: 1.4;
+}
+
+/* ── CONFLICT STEPS ── */
+.conflict-steps { display: flex; flex-direction: column; gap: 0.55em; margin-top: 0.9em; }
+.c-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1em;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75em 1em;
+}
+.c-num {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 1.6em;
+  line-height: 1;
+}
+.c-title { font-weight: 600; color: var(--white); font-size: clamp(0.78rem, 1.2vw, 0.9rem); margin-bottom: 0.2em; }
+.c-desc  { font-size: clamp(0.7rem, 1.05vw, 0.82rem); color: var(--text); line-height: 1.5; }
+
+.outcome-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6em; margin-top: 0.7em; }
+.outcome {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75em 1em;
+  font-size: clamp(0.7rem, 1.05vw, 0.82rem);
+  line-height: 1.55;
+}
+.outcome-win  { border-color: #4a7c59; background: rgba(74,124,89,0.08); }
+.outcome-loss { border-color: #7c4a4a; background: rgba(124,74,74,0.08); }
+.outcome strong { display: block; margin-bottom: 0.25em; font-size: clamp(0.75rem, 1.1vw, 0.86rem); }
+.outcome-win strong  { color: #7cc49a; }
+.outcome-loss strong { color: #c47a7a; }
+
+/* ── SHEET ITEMS ── */
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7em;
+  margin-top: 0.9em;
+}
+
+/* ── SPHERES SLIDE ── */
+.browser-wrap {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1em;
+  margin-top: 0.8em;
+  height: calc(100vh - 9rem);
+  min-height: 0;
+}
+.spheres-layout { display: none; }
+
+.sphere-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+.sphere-list::-webkit-scrollbar { width: 4px; }
+.sphere-list::-webkit-scrollbar-track { background: transparent; }
+.sphere-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sphere-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6em 0.9em;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+.sphere-btn:hover { border-color: var(--accent-dim); }
+.sphere-btn.active { border-color: var(--accent); background: rgba(232,197,71,0.06); }
+
+.sphere-btn-name {
+  font-weight: 600;
+  color: var(--white);
+  font-size: clamp(0.75rem, 1.1vw, 0.88rem);
+}
+.sphere-btn-impulse {
+  font-size: clamp(0.58rem, 0.85vw, 0.68rem);
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.sphere-detail {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-y: auto;
+  padding: 1em 1.2em;
+}
+.sphere-detail::-webkit-scrollbar { width: 4px; }
+.sphere-detail::-webkit-scrollbar-track { background: transparent; }
+.sphere-detail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sphere-detail-title {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.1em;
+}
+.sphere-detail-impulse {
+  font-size: clamp(0.62rem, 0.95vw, 0.75rem);
+  color: var(--accent-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 0.9em;
+}
+
+.class-entry {
+  border-bottom: 1px solid var(--border);
+  padding: 0.75em 0;
+}
+.class-entry:last-child { border-bottom: none; }
+.class-entry-name {
+  font-weight: 600;
+  color: var(--white);
+  font-size: clamp(0.78rem, 1.15vw, 0.9rem);
+  margin-bottom: 0.15em;
+}
+.class-entry-tagline {
+  font-size: clamp(0.65rem, 0.95vw, 0.75rem);
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 0.35em;
+}
+.class-sentences {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.class-sentence {
+  font-size: clamp(0.62rem, 0.9vw, 0.72rem);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  padding-left: 0.8em;
+  border-left: 2px solid var(--border);
+  line-height: 1.4;
+}
+
+/* ── BONDS SLIDE ── */
+.bond-example {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9em 1.1em;
+  margin-bottom: 0.6em;
+}
+.bond-example-label {
+  font-size: clamp(0.58rem, 0.85vw, 0.68rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.4em;
+}
+.bond-text {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(0.88rem, 1.4vw, 1.05rem);
+  color: var(--white);
+  line-height: 1.4;
+}
+.bond-note {
+  font-size: clamp(0.62rem, 0.9vw, 0.72rem);
+  color: var(--text-dim);
+  margin-top: 0.3em;
+  line-height: 1.4;
+}
+
+/* ── SESSION ZERO CHECKLIST ── */
+.sz-steps { display: flex; flex-direction: column; gap: 0.45em; margin-top: 0.9em; }
+.sz-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9em;
+  padding: 0.7em 1em;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  user-select: none;
+}
+.sz-step:hover { border-color: var(--accent-dim); }
+.sz-step.done { opacity: 0.4; }
+.sz-check {
+  width: 18px; height: 18px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--accent);
+  transition: border-color 0.15s, background 0.15s;
+}
+.sz-step.done .sz-check { border-color: var(--accent-dim); background: rgba(232,197,71,0.1); }
+.sz-step.done .sz-check::after { content: '✓'; }
+.sz-body { flex: 1; }
+.sz-title { font-weight: 600; color: var(--white); font-size: clamp(0.75rem, 1.1vw, 0.86rem); margin-bottom: 0.15em; }
+.sz-desc  { font-size: clamp(0.64rem, 0.95vw, 0.76rem); color: var(--text); line-height: 1.5; }
+
+/* ── FOUNDATION PROMPTS ── */
+.foundation-prompts { display: flex; flex-direction: column; gap: 0.6em; margin-top: 0.9em; }
+.fp-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85em 1.1em;
+}
+.fp-prompt {
+  font-size: clamp(0.62rem, 0.9vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  margin-bottom: 0.5em;
+}
+.fp-example {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(0.88rem, 1.35vw, 1rem);
+  color: var(--white);
+  line-height: 1.5;
+  margin-bottom: 0.25em;
+}
+.fp-example::before { content: '"'; }
+.fp-example::after  { content: '"'; }
+.fp-note {
+  font-size: clamp(0.6rem, 0.88vw, 0.7rem);
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* ── HALLMARKS ── */
+.hallmark-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6em;
+  margin-top: 0.9em;
+}
+.hm-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85em 1.1em;
+}
+.hm-label { font-size: clamp(0.58rem,0.85vw,0.68rem); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.4em; }
+.hm-before {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(0.85rem,1.3vw,1rem);
+  color: var(--text-dim);
+  margin-bottom: 0.35em;
+}
+.hm-after {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(0.85rem,1.3vw,1rem);
+  color: var(--white);
+}
+.hm-arrow { font-size: 0.7rem; color: var(--accent); margin-bottom: 0.2em; }
+.hm-note { font-size: clamp(0.6rem,0.88vw,0.7rem); color:var(--text-dim); margin-top:0.4em; line-height:1.4; }
+
+/* ── CLOSE ── */
+.close-lines {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.25;
+  margin-bottom: 1em;
+}
+.close-lines em { color: var(--accent); font-style: normal; }
+.tagline {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  color: var(--text-dim);
+  margin-top: 1.5em;
+}
+
+/* ── HIGHLIGHT BOX ── */
+.highlight {
+  background: rgba(232,197,71,0.05);
+  border: 1px solid rgba(232,197,71,0.2);
+  border-radius: 6px;
+  padding: 0.7em 1em;
+  margin-top: 0.7em;
+  font-size: clamp(0.7rem, 1.05vw, 0.82rem);
+  color: var(--text);
+  line-height: 1.55;
+}
+.highlight strong { color: var(--accent); }
+
+/* ── DREAM BLOCK ── */
+.dream-examples { display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.9em; }
+.dream-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75em 1em;
+}
+.dream-class { font-size:clamp(0.58rem,0.85vw,0.68rem); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.3em; }
+.dream-text {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(0.85rem,1.3vw,1rem);
+  color: var(--white);
+  line-height: 1.4;
+}
+
+/* ── SPHERE BROWSER CSS ── */
+#sp0:checked ~ .browser-wrap .sphere-list label[for="sp0"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp0:checked ~ .browser-wrap #panel0 { display: block; }
+#sp1:checked ~ .browser-wrap .sphere-list label[for="sp1"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp1:checked ~ .browser-wrap #panel1 { display: block; }
+#sp2:checked ~ .browser-wrap .sphere-list label[for="sp2"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp2:checked ~ .browser-wrap #panel2 { display: block; }
+#sp3:checked ~ .browser-wrap .sphere-list label[for="sp3"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp3:checked ~ .browser-wrap #panel3 { display: block; }
+#sp4:checked ~ .browser-wrap .sphere-list label[for="sp4"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp4:checked ~ .browser-wrap #panel4 { display: block; }
+#sp5:checked ~ .browser-wrap .sphere-list label[for="sp5"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp5:checked ~ .browser-wrap #panel5 { display: block; }
+#sp6:checked ~ .browser-wrap .sphere-list label[for="sp6"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp6:checked ~ .browser-wrap #panel6 { display: block; }
+#sp7:checked ~ .browser-wrap .sphere-list label[for="sp7"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp7:checked ~ .browser-wrap #panel7 { display: block; }
+#sp8:checked ~ .browser-wrap .sphere-list label[for="sp8"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp8:checked ~ .browser-wrap #panel8 { display: block; }
+#sp9:checked ~ .browser-wrap .sphere-list label[for="sp9"] { border-color: var(--accent); background: rgba(232,197,71,0.06); color: var(--white); }
+#sp9:checked ~ .browser-wrap #panel9 { display: block; }
+
+.sphere-list { display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+.sphere-list::-webkit-scrollbar { width:4px; }
+.sphere-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.sphere-panel { display:none; }
+.warn-box { font-size:0.7rem; color:#c47a7a; margin-bottom:0.8em; padding:0.4em 0.7em; border:1px solid #7c4a4a; border-radius:4px; background:rgba(124,74,74,0.08); }
+
+.breadcrumb { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 1.2rem; }
+.breadcrumb a { color: var(--text-dim); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ══ 1. TITLE ══ -->
+<section class="slide slide-title" id="s1">
+  <div class="stars" id="stars1"></div>
+  <div class="corpse-sun"></div>
+  <div class="slide-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> → Player Guide</div>
+    <div class="eyebrow">Player Guide · Realis by Austin Walker</div>
+    <h1>Making your first character.</h1>
+    <div class="title-subtitle">Everything you need before Session Zero.</div>
+    <div class="title-byline">Scroll or use arrow keys · 18 slides</div>
+  </div>
+</section>
+
+<!-- ══ 2. WHAT KIND OF GAME ══ -->
+<section class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="eyebrow">First things first</div>
+    <h2>No dice. No stats. Just statements.</h2>
+    <p>Realis is a collaborative storytelling game set across a thousand strange moons — science-fantasy, sword and sorcery, space opera. It's diceless. Your character is defined by a set of bold statements called <strong>Sentences</strong>. When two characters want opposite things, you compare whose Sentence is more <em>Real</em>. Higher rank wins.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-label">What it feels like at the table</div>
+        <p>Mostly conversation. The GM describes what's happening, players say what they do, the group figures out what happens next. Conflict resolution kicks in when the outcome is uncertain <em>and</em> opposed — not for everything.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">The thing that surprises people</div>
+        <p>You will lose your first conflicts. That's intentional. Losing is how your character grows. Get a Sentence Countered three times and it gets more powerful — but also more specific to your story.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 3. SENTENCES EXPLAINED ══ -->
+<section class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="eyebrow">The core mechanic</div>
+    <h2>Sentences are what your character can <em>always</em> do.</h2>
+    <p>Your character has four Sentences that come with their Class. They all start at <strong>+0</strong>. When one fails in Conflict three times, you can <strong>Realize</strong> it: the rank goes up by 1 and you add a limitation to the text. It becomes stronger, and more specific to your character's actual story.</p>
+    <div class="sentence-stack">
+      <div class="sentence-row">
+        <div class="rank">+0</div>
+        <div class="sentence-text">I always wear the right outfit.</div>
+        <div class="sentence-note">Broad. Works almost anywhere. But you lose on ties at +0.</div>
+      </div>
+      <div class="sentence-row">
+        <div class="rank">+1</div>
+        <div class="sentence-text">I always wear the right outfit during important events.</div>
+        <div class="sentence-note">After three failures. Stronger, but random taverns don't count.</div>
+      </div>
+      <div class="sentence-row">
+        <div class="rank">+2</div>
+        <div class="sentence-text">I always wear the right outfit during important events which I was invited to.</div>
+        <div class="sentence-note">Crashes don't count now either.</div>
+      </div>
+      <div class="sentence-row">
+        <div class="rank">+3</div>
+        <div class="sentence-text">I always wear the right outfit during important events which a <strong>friend</strong> invited me to.</div>
+        <div class="sentence-note">Maximum rank. This Sentence has a story now.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 4. HOW CONFLICT WORKS ══ -->
+<section class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="eyebrow">When things get uncertain</div>
+    <h2>How Conflict works.</h2>
+    <p>If you're doing something unopposed or where the outcome isn't interesting, you just succeed — describe it and move on. Conflict kicks in when the outcome is uncertain <em>and</em> opposed.</p>
+    <div class="conflict-steps">
+      <div class="c-step">
+        <div class="c-num">1</div>
+        <div>
+          <div class="c-title">Declare Intent and Means</div>
+          <div class="c-desc">Say what you want to happen — dramatically, not just physically. "I want to humiliate him in front of his crew" is better than "I punch him." Then name which Sentence you're using to do it.</div>
+        </div>
+      </div>
+      <div class="c-step">
+        <div class="c-num">2</div>
+        <div>
+          <div class="c-title">Counteractor declares their Means</div>
+          <div class="c-desc">If someone is opposing you, they name their Sentence. No opposition? You succeed automatically.</div>
+        </div>
+      </div>
+      <div class="c-step">
+        <div class="c-num">3</div>
+        <div>
+          <div class="c-title">Compare ranks. Higher wins. Ties go to the defender.</div>
+          <div class="c-desc">You can spend your Token before comparing to boost your Sentence by +1.</div>
+        </div>
+      </div>
+    </div>
+    <div class="outcome-row">
+      <div class="outcome outcome-win">
+        <strong>You win</strong>
+        Your intent comes to pass. Describe what happens.
+      </div>
+      <div class="outcome outcome-loss">
+        <strong>They win</strong>
+        Your Sentence is <em>Countered</em>. Put parentheses around it — you can't use it again until the scene changes. Mark it. Three marks and it's ready to Realize.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 5. WHAT'S ON YOUR SHEET ══ -->
+<section class="slide" id="s5">
+  <div class="slide-inner">
+    <div class="eyebrow">Your character sheet</div>
+    <h2>Six things. That's the whole sheet.</h2>
+    <div class="sheet-grid">
+      <div class="card">
+        <div class="card-label">Class Sentences ×4</div>
+        <p>What you can always do. Come with your Class. All start at +0. The fourth one is a flaw — it can be used against you, but deliberately triggering it can recharge your Token.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Bonds ×2</div>
+        <p>Sentences about your relationship with another PC. Can be used as a Means in Conflict. Each Bond must target a different person. Three uses and it Realizes — both characters recharge Tokens.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Dream ×1</div>
+        <p>Single use, ever. Cross it off and you overcome any uncertain obstacle. Save it for a moment that defines your character. Achieving your Dream is a natural way to retire.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Token ×1</div>
+        <p>Rechargeable. Spend it to boost any Means +1 for one Conflict. Recharges when you act on your Sphere's Impulse during a Conflict, or when a Bond Realizes.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Impulse</div>
+        <p>Your Sphere's recurring instinct. Act on it during a Conflict — win or lose — and your Token recharges. You'll write this on your sheet from your Sphere's entry.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Band Sentence (shared)</div>
+        <p>One Sentence the whole group shares, starting at +1. Used once per session when everyone agrees. Written together in Session Zero: "When we work together, we always…"</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 6. PICKING A CLASS (OVERVIEW) ══ -->
+<section class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 1 of character creation</div>
+    <h2>Pick a Class.</h2>
+    <p>There are 50+ classes organized into <strong>ten Spheres</strong>. A Sphere is a cluster of classes that share a common instinct — their <strong>Impulse</strong>. Don't optimize. Ask yourself: when things go wrong, what does your character reach for first? That'll point you to a Sphere.</p>
+    <div class="highlight">
+      <strong>You can switch classes mid-campaign.</strong> If a class stops feeling right after a few sessions, frame a scene where your current character steps out of the action — then introduce someone new. There's no penalty.
+    </div>
+    <p style="margin-top:0.8em;">The next slide has every Sphere with all its classes and their Sentences. Click a Sphere on the left to open it.</p>
+    <div class="highlight" style="margin-top:0.6em;">
+      <strong>One note on the Sphere of Semantics:</strong> those classes have extra mechanical complexity — one of them has you manage two character sheets at once. Worth avoiding for your first character unless that specifically appeals to you.
+    </div>
+  </div>
+</section>
+
+<!-- ══ 7. CLASS BROWSER ══ -->
+<section class="slide" id="s7">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 1 · Class browser</div>
+    <h2>Ten Spheres.</h2>
+    <input type="radio" name="sp" id="sp0" checked style="display:none">
+<input type="radio" name="sp" id="sp1" style="display:none">
+<input type="radio" name="sp" id="sp2" style="display:none">
+<input type="radio" name="sp" id="sp3" style="display:none">
+<input type="radio" name="sp" id="sp4" style="display:none">
+<input type="radio" name="sp" id="sp5" style="display:none">
+<input type="radio" name="sp" id="sp6" style="display:none">
+<input type="radio" name="sp" id="sp7" style="display:none">
+<input type="radio" name="sp" id="sp8" style="display:none">
+<input type="radio" name="sp" id="sp9" style="display:none">
+<div class="browser-wrap">
+<div class="sphere-list">
+<label for="sp0" class="sphere-btn"><div class="sphere-btn-name">Steel</div><div class="sphere-btn-impulse">Respond to a peaceful problem with violent Means</div></label>
+<label for="sp1" class="sphere-btn"><div class="sphere-btn-name">Sorcery</div><div class="sphere-btn-impulse">Respond to a mundane problem with magical Means</div></label>
+<label for="sp2" class="sphere-btn"><div class="sphere-btn-name">Spirit</div><div class="sphere-btn-impulse">Respond to an urgent problem with ritualistic Means</div></label>
+<label for="sp3" class="sphere-btn"><div class="sphere-btn-name">Shadow</div><div class="sphere-btn-impulse">Respond to a noble problem with dishonorable Means</div></label>
+<label for="sp4" class="sphere-btn"><div class="sphere-btn-name">Sojourn</div><div class="sphere-btn-impulse">Respond to a local problem with excursionary Means</div></label>
+<label for="sp5" class="sphere-btn"><div class="sphere-btn-name">Science</div><div class="sphere-btn-impulse">Respond to an intuitive problem with technical Means</div></label>
+<label for="sp6" class="sphere-btn"><div class="sphere-btn-name">Stagecraft</div><div class="sphere-btn-impulse">Respond to a private problem through public Means</div></label>
+<label for="sp7" class="sphere-btn"><div class="sphere-btn-name">Society</div><div class="sphere-btn-impulse">Respond to a material problem through social Means</div></label>
+<label for="sp8" class="sphere-btn"><div class="sphere-btn-name">Stories</div><div class="sphere-btn-impulse">Respond to an epic problem with everyday Means</div></label>
+<label for="sp9" class="sphere-btn"><div class="sphere-btn-name">Semantics <span style="font-size:0.55rem;color:#c47a7a;border:1px solid #7c4a4a;border-radius:3px;padding:1px 4px;vertical-align:middle;margin-left:4px;">advanced</span></div><div class="sphere-btn-impulse">Respond to a simple problem with complex Means</div></label>
+</div>
+<div class="sphere-detail">
+<div class="sphere-panel" id="panel0"><div class="sphere-detail-title">Steel</div><div class="sphere-detail-impulse">Respond to a peaceful problem with violent Means</div><div class="class-entry"><div class="class-entry-name">Berserker</div><div class="class-entry-tagline">A warrior who both finds and loses themself in battle.</div><div class="class-sentences"><div class="class-sentence">I always kill my foe.</div><div class="class-sentence">I always carry an ❧unstoppable weapon☙.</div><div class="class-sentence">I always learn through violence.</div><div class="class-sentence flaw">I always hurt those close to me.</div></div></div><div class="class-entry"><div class="class-entry-name">Duelist</div><div class="class-entry-tagline">One-on-one combatant. Precise and showy.</div><div class="class-sentences"><div class="class-sentence">I always win a one-on-one fight.</div><div class="class-sentence">I always impress those who see me in combat.</div><div class="class-sentence">I always wield a ❧beautiful and distinct weapon☙.</div><div class="class-sentence flaw">I always accept a challenger.</div></div></div><div class="class-entry"><div class="class-entry-name">Gonnist</div><div class="class-entry-tagline">Marksmen and shootists wielding the rarest and most contemptible weapons.</div><div class="class-sentences"><div class="class-sentence">I always fight from a safe distance.</div><div class="class-sentence">I always intimidate others with my weapon.</div><div class="class-sentence">I am always identified by the ❧gonne☙ I carry.</div><div class="class-sentence flaw">I always hear the voice of the trigger.</div></div></div><div class="class-entry"><div class="class-entry-name">Juggernaut</div><div class="class-entry-tagline">Big, immensely strong, and unstoppable once in motion.</div><div class="class-sentences"><div class="class-sentence">I always embody an unshakeable ❧creed☙.</div><div class="class-sentence">I always open the way for others.</div><div class="class-sentence">I always burst through obstacles.</div><div class="class-sentence flaw">I always make myself a target.</div></div></div><div class="class-entry"><div class="class-entry-name">Knight</div><div class="class-entry-tagline">Armored soldiers astride steeds, wielding their high station as much as their blade.</div><div class="class-sentences"><div class="class-sentence">I always ride astride an imposing ❧mount☙.</div><div class="class-sentence">I always wear arms most gleaming.</div><div class="class-sentence">I always wield the arresting confidence of honor.</div><div class="class-sentence flaw">I always answer a challenge or insult, whether made to me or mine.</div></div></div><div class="class-entry"><div class="class-entry-name">Oriflamme</div><div class="class-entry-tagline">Famed frontline leaders, renowned for both tactical and martial acumen.</div><div class="class-sentences"><div class="class-sentence">I always lead my comrades to victory.</div><div class="class-sentence">I always appear heroic in battle.</div><div class="class-sentence">I always wear the ❧pristine armor☙ of my station.</div><div class="class-sentence flaw">I always pursue my grand ambition.</div></div></div></div>
+<div class="sphere-panel" id="panel1"><div class="sphere-detail-title">Sorcery</div><div class="sphere-detail-impulse">Respond to a mundane problem with magical Means</div><div class="class-entry"><div class="class-entry-name">Esoteric</div><div class="class-entry-tagline">High-falutin eccentrics. Tourists of the occult. Paid well for their services.</div><div class="class-sentences"><div class="class-sentence">I always amaze with my mastery of the mystical.</div><div class="class-sentence">I always bring my collection of occult ephemera.</div><div class="class-sentence">I always have the ear of a potential patron.</div><div class="class-sentence flaw">I always play with forces beyond my control.</div></div></div><div class="class-entry"><div class="class-entry-name">Fantasist</div><div class="class-entry-tagline">A traveling master of illusory magic, drawing on the Drift to deceive, trick, and enchant.</div><div class="class-sentences"><div class="class-sentence">I always misdirect or confuse my foes.</div><div class="class-sentence">I always recognize a deception.</div><div class="class-sentence">I always put on a good show.</div><div class="class-sentence flaw">I always dream of the Drift.</div></div></div><div class="class-entry"><div class="class-entry-name">Pomesse</div><div class="class-entry-tagline">Mistress of smoke. Master of shade. With a swing of a censer, the world is changed.</div><div class="class-sentences"><div class="class-sentence">I always exert my will over the atmosphere with my perfumes.</div><div class="class-sentence">I always shift the truth with my smoke.</div><div class="class-sentence">I always strike with the hidden edges of my pomander.</div><div class="class-sentence flaw">I always invite the uninvited with my fragrances.</div></div></div><div class="class-entry"><div class="class-entry-name">Syzygist</div><div class="class-entry-tagline">Attends to cosmic alignment to sense what the future will bring.</div><div class="class-sentences"><div class="class-sentence">I always read the future in the spheres.</div><div class="class-sentence">I always sense which prediction someone needs to hear.</div><div class="class-sentence">I always know how to ritually align the celestial.</div><div class="class-sentence flaw">I always become lost in signs and portents.</div></div></div><div class="class-entry"><div class="class-entry-name">Thaumaturge</div><div class="class-entry-tagline">Wizards knowledgeable of the great formal schools of magic.</div><div class="class-sentences"><div class="class-sentence">I always carry my hand-curated book of grand spells.</div><div class="class-sentence">I always know a few showy tricks.</div><div class="class-sentence">I always project an image of unerring wisdom.</div><div class="class-sentence flaw">I always reject the use of unorthodox magic.</div></div></div></div>
+<div class="sphere-panel" id="panel2"><div class="sphere-detail-title">Spirit</div><div class="sphere-detail-impulse">Respond to an urgent problem with ritualistic Means</div><div class="class-entry"><div class="class-entry-name">Cultist</div><div class="class-entry-tagline">Mystagogues of a furtive religion, leading new, ever more zealous followers into the fold.</div><div class="class-sentences"><div class="class-sentence">I always know where to find an enclave of other &ldquo;heretics.&rdquo;</div><div class="class-sentence">I always entice others with the intensity of my belief.</div><div class="class-sentence">I always enact the ritual to summon the power of my ❧deity☙.</div><div class="class-sentence flaw">I always need to worship surreptitiously.</div></div></div><div class="class-entry"><div class="class-entry-name">Gaunt</div><div class="class-entry-tagline">Cursed to be both death's emissary and custodian.</div><div class="class-sentences"><div class="class-sentence">I always know who will die next.</div><div class="class-sentence">I always exude an ominous presence.</div><div class="class-sentence">I always address grief with ritual.</div><div class="class-sentence flaw">I always arrive at the wrong moment.</div></div></div><div class="class-entry"><div class="class-entry-name">Quintessent</div><div class="class-entry-tagline">Ghostly embodiment of a person, place, element, or concept. Sometimes a dead one.</div><div class="class-sentences"><div class="class-sentence">I always force others to confront the truth.</div><div class="class-sentence">I always wield ❧a spectral or elemental power☙.</div><div class="class-sentence">I always frighten those who perceive me.</div><div class="class-sentence flaw">I always linger where I am not welcome.</div></div></div><div class="class-entry"><div class="class-entry-name">Theologicant</div><div class="class-entry-tagline">God is missing, some say. These scholars wonder which god you might mean.</div><div class="class-sentences"><div class="class-sentence">I always know the rituals of Realis&#39; many faiths.</div><div class="class-sentence">I always hear the whispers of countless daemons.</div><div class="class-sentence">I always make the presence of the divine felt among others.</div><div class="class-sentence flaw">I always doubt.</div></div></div><div class="class-entry"><div class="class-entry-name">Witch</div><div class="class-entry-tagline">Wicker and word. Blood and blade. For generations.</div><div class="class-sentences"><div class="class-sentence">I always know the old words of control.</div><div class="class-sentence">I always trade blood for shape.</div><div class="class-sentence">I always hide my shelter.</div><div class="class-sentence flaw">I always let the nature of Realis take control.</div></div></div></div>
+<div class="sphere-panel" id="panel3"><div class="sphere-detail-title">Shadow</div><div class="sphere-detail-impulse">Respond to a noble problem with dishonorable Means</div><div class="class-entry"><div class="class-entry-name">Blackguard</div><div class="class-entry-tagline">Stalks in silence, kills in secret, and does both for profit.</div><div class="class-sentences"><div class="class-sentence">I always get the drop on my target.</div><div class="class-sentence">I always coat my blade with a useful poison.</div><div class="class-sentence">I always disappear into the dark.</div><div class="class-sentence flaw">I always find a well-paying job.</div></div></div><div class="class-entry"><div class="class-entry-name">Cadekin</div><div class="class-entry-tagline">An orphaned hunter and their beast of prey, drawn together in the wild.</div><div class="class-sentences"><div class="class-sentence">I always track down my prey.</div><div class="class-sentence">I always hit my mark.</div><div class="class-sentence">I always hunt alongside my ❧loyal companion☙.</div><div class="class-sentence flaw">I always act rashly when alone.</div></div></div><div class="class-entry"><div class="class-entry-name">Misericorde</div><div class="class-entry-tagline">Part lay-clergy, part nurse, part killer.</div><div class="class-sentences"><div class="class-sentence">I always provide thorough care.</div><div class="class-sentence">I always wield the slender tools of mercy.</div><div class="class-sentence">I always wear the Black Vestment.</div><div class="class-sentence flaw">I always demand mercy be given to others.</div></div></div><div class="class-entry"><div class="class-entry-name">Runner</div><div class="class-entry-tagline">Transporters, smugglers, and couriers.</div><div class="class-sentences"><div class="class-sentence">I always have a solid alibi.</div><div class="class-sentence">I always keep my cargo hidden.</div><div class="class-sentence">I always unveil a concealed weapon.</div><div class="class-sentence flaw">I always pilot my ❧Orphan Vessel☙ towards trouble.</div></div></div><div class="class-entry"><div class="class-entry-name">Skulduggerist</div><div class="class-entry-tagline">Cutpurses, housebreakers, thieves, and other movers-in-shadow.</div><div class="class-sentences"><div class="class-sentence">I always open locks in my way.</div><div class="class-sentence">I always have the right tool for the job.</div><div class="class-sentence">I always keep a hidden blade on me.</div><div class="class-sentence flaw">I always leave a ❧calling card☙.</div></div></div></div>
+<div class="sphere-panel" id="panel4"><div class="sphere-detail-title">Sojourn</div><div class="sphere-detail-impulse">Respond to a local problem with excursionary Means</div><div class="class-entry"><div class="class-entry-name">Curioste</div><div class="class-entry-tagline">Antiquarians, merchants, and cabinet-keepers.</div><div class="class-sentences"><div class="class-sentence">I always find the most valuable thing.</div><div class="class-sentence">I always get a good price.</div><div class="class-sentence">I always weave a memorable story.</div><div class="class-sentence flaw">I always acquire more than I can carry.</div></div></div><div class="class-entry"><div class="class-entry-name">Kestrel</div><div class="class-entry-tagline">Kitebound scouts who glide on the aetherflows.</div><div class="class-sentences"><div class="class-sentence">I always use my ❧glider☙ to reach places no one else can.</div><div class="class-sentence">I always have the upper hand on those below me.</div><div class="class-sentence">I always find a friend among those that fly.</div><div class="class-sentence flaw">I always dive too quickly.</div></div></div><div class="class-entry"><div class="class-entry-name">Liminalist</div><div class="class-entry-tagline">Showy and expensive guide of the Drift.</div><div class="class-sentences"><div class="class-sentence">I always escape pursuers.</div><div class="class-sentence">I always know how to enter or leave the Drift.</div><div class="class-sentence">I always guide others to emotional extremes.</div><div class="class-sentence flaw">I always bear the Drift&#39;s strange ❧mark☙.</div></div></div><div class="class-entry"><div class="class-entry-name">Newshound</div><div class="class-entry-tagline">Gonzo writers eager to tell hidden truths, so long as they are credited with the telling.</div><div class="class-sentences"><div class="class-sentence">I always get the scoop.</div><div class="class-sentence">I always slip past the perimeter.</div><div class="class-sentence">I always communicate in compelling ways.</div><div class="class-sentence flaw">I always attach my name to my story.</div></div></div><div class="class-entry"><div class="class-entry-name">Peregrine</div><div class="class-entry-tagline">Knight-errant, driven by disaffection, wanderlust, or a desire to find the right lord.</div><div class="class-sentences"><div class="class-sentence">I always wear the distinguished ❧arms☙ of my past service.</div><div class="class-sentence">I always call on old allies.</div><div class="class-sentence">I always have the determination to continue.</div><div class="class-sentence flaw">I always leave eventually.</div></div></div><div class="class-entry"><div class="class-entry-name">Xenagogue</div><div class="class-entry-tagline">A showy tour guide and courier from a long legacy of navigators and messengers.</div><div class="class-sentences"><div class="class-sentence">I always pilot my ❧Orphan Vessel☙ with great skill.</div><div class="class-sentence">I always find the way through or around.</div><div class="class-sentence">I always have the right map, somewhere.</div><div class="class-sentence flaw">I always announce my presence with unmistakable flair.</div></div></div></div>
+<div class="sphere-panel" id="panel5"><div class="sphere-detail-title">Science</div><div class="sphere-detail-impulse">Respond to an intuitive problem with technical Means</div><div class="class-entry"><div class="class-entry-name">Alchemist</div><div class="class-entry-tagline">Master of phials, unguents, and petty transmutations. Perhaps, one day, more.</div><div class="class-sentences"><div class="class-sentence">I always cure my patient.</div><div class="class-sentence">I always carry a satchel of alchemical supplies.</div><div class="class-sentence">I always identify an object&#39;s material composition.</div><div class="class-sentence flaw">I always experiment on others.</div></div></div><div class="class-entry"><div class="class-entry-name">Auricle</div><div class="class-entry-tagline">Sonic sociologists and listener-prophets.</div><div class="class-sentences"><div class="class-sentence">I always hear the future coming.</div><div class="class-sentence">I always wear the prestigious ❧earpiece☙ of my vocation.</div><div class="class-sentence">I always recognize the sound of a lie.</div><div class="class-sentence flaw">I always hear more than I want to.</div></div></div><div class="class-entry"><div class="class-entry-name">Fixit</div><div class="class-entry-tagline">Practical mechanics and shrewd tinkerers.</div><div class="class-sentences"><div class="class-sentence">I always fix what&#39;s broken.</div><div class="class-sentence">I always lug around my tool kit.</div><div class="class-sentence">I always defuse explosive situations.</div><div class="class-sentence flaw">I always listen to a machine&#39;s demands.</div></div></div><div class="class-entry"><div class="class-entry-name">Mountebank</div><div class="class-entry-tagline">Charlatans, snake oil sellers, and (occasionally) herbalists.</div><div class="class-sentences"><div class="class-sentence">I always close the sale.</div><div class="class-sentence">I always make my exit.</div><div class="class-sentence">I always have a little bit of the real thing.</div><div class="class-sentence flaw">I always promise more than I can deliver.</div></div></div><div class="class-entry"><div class="class-entry-name">Pedagogue</div><div class="class-entry-tagline">Teachers, philosophers, naturalists, and lecturers.</div><div class="class-sentences"><div class="class-sentence">I always get my point across.</div><div class="class-sentence">I always know the right text to reference.</div><div class="class-sentence">I always shake one&#39;s faith in oneself.</div><div class="class-sentence flaw">I always separate myself from those I seek to teach.</div></div></div></div>
+<div class="sphere-panel" id="panel6"><div class="sphere-detail-title">Stagecraft</div><div class="sphere-detail-impulse">Respond to a private problem through public Means</div><div class="class-entry"><div class="class-entry-name">Idol</div><div class="class-entry-tagline">Beloved, showy, and influential. Dangerous and targeted for those reasons.</div><div class="class-sentences"><div class="class-sentence">I always garner affection.</div><div class="class-sentence">I always direct my followers to my ends.</div><div class="class-sentence">I always wear prestigious attire.</div><div class="class-sentence flaw">I always get wrapped into the Dreams of others.</div></div></div><div class="class-entry"><div class="class-entry-name">Jeopardist</div><div class="class-entry-tagline">Daredevil, escape artist, circus performer, and death chaser.</div><div class="class-sentences"><div class="class-sentence">I always move my body in striking ways.</div><div class="class-sentence">I always escape unharmed.</div><div class="class-sentence">I always keep things balanced.</div><div class="class-sentence flaw">I always leap into danger.</div></div></div><div class="class-entry"><div class="class-entry-name">Predicant</div><div class="class-entry-tagline">Sermonizers, evangelists, and preachers in every sense of the word.</div><div class="class-sentences"><div class="class-sentence">I always deliver my sermon with aplomb.</div><div class="class-sentence">I always leave others feeling guilty.</div><div class="class-sentence">I always offer words instead of deeds.</div><div class="class-sentence flaw">I always speak when silence would serve better.</div></div></div><div class="class-entry"><div class="class-entry-name">Stringent</div><div class="class-entry-tagline">Griots, mediators, and oral historians, bound by rope and tradition.</div><div class="class-sentences"><div class="class-sentence">I always remember what really happened back then.</div><div class="class-sentence">I always know the best version of the story to tell.</div><div class="class-sentence">I always voice the rhythm of the future.</div><div class="class-sentence flaw">I always hold others to their word.</div></div></div><div class="class-entry"><div class="class-entry-name">Virtuoso</div><div class="class-entry-tagline">A source of the exquisite, or merely someone who adds luster to the mundane.</div><div class="class-sentences"><div class="class-sentence">I always impress others with my ❧craft☙.</div><div class="class-sentence">I always draw an audience.</div><div class="class-sentence">I always know the right medium to use.</div><div class="class-sentence flaw">I always provoke jealousy.</div></div></div><div class="class-entry"><div class="class-entry-name">Zanni</div><div class="class-entry-tagline">The jester, the clown, the torrid juggler. (This is their description. They stole the pen.)</div><div class="class-sentences"><div class="class-sentence">I always bring joy with my antics.</div><div class="class-sentence">I always reveal the truth.</div><div class="class-sentence">I always anger the powerful.</div><div class="class-sentence flaw">I always go too far.</div></div></div></div>
+<div class="sphere-panel" id="panel7"><div class="sphere-detail-title">Society</div><div class="sphere-detail-impulse">Respond to a material problem through social Means</div><div class="class-entry"><div class="class-entry-name">Aureate</div><div class="class-entry-tagline">The final scion of a dying line.</div><div class="class-sentences"><div class="class-sentence">I always exude the golden aura of a grand past.</div><div class="class-sentence">I always know someone who owed my family a favor.</div><div class="class-sentence">I always rely on my ❧heirloom☙ as both a tool and symbol.</div><div class="class-sentence flaw">I always overextend myself to keep up appearances.</div></div></div><div class="class-entry"><div class="class-entry-name">Heritor</div><div class="class-entry-tagline">However old, still principally known as the child of a high-ranking noble.</div><div class="class-sentences"><div class="class-sentence">I always travel with a skilled ❧bodyguard☙.</div><div class="class-sentence">I always move with the athleticism earned from a life of privilege.</div><div class="class-sentence">I always have the wealth of my inheritance.</div><div class="class-sentence flaw">I always live in the shadow of my lineage.</div></div></div><div class="class-entry"><div class="class-entry-name">Knave</div><div class="class-entry-tagline">Scoundrels, layabouts, and worldly travelers.</div><div class="class-sentences"><div class="class-sentence">I always know the passphrase.</div><div class="class-sentence">I always wear the right outfit.</div><div class="class-sentence">I always keep a little dagger on my belt.</div><div class="class-sentence flaw">I always leave a lasting impression.</div></div></div><div class="class-entry"><div class="class-entry-name">Questionist</div><div class="class-entry-tagline">Mystery solvers. Detectives. Experts at ratiocination.</div><div class="class-sentences"><div class="class-sentence">I always uncover the truth.</div><div class="class-sentence">I always fluster a liar.</div><div class="class-sentence">I always carry a small, but fashionable ❧weapon☙.</div><div class="class-sentence flaw">I always suspect everyone of guilt.</div></div></div><div class="class-entry"><div class="class-entry-name">Valet</div><div class="class-entry-tagline">The chief servant for a noble, or someone using power to pretend to be. Eyes in rich places.</div><div class="class-sentences"><div class="class-sentence">I always speak with the voice of my ❧master☙.</div><div class="class-sentence">I always see through the pretenses of the powerful.</div><div class="class-sentence">I always know a way into a house of means.</div><div class="class-sentence flaw">I always do what is asked of me.</div></div></div><div class="class-entry"><div class="class-entry-name">Yeoman</div><div class="class-entry-tagline">Adjutant, aide-de-camp, and military staff officer. Mid-level attendant with a sword.</div><div class="class-sentences"><div class="class-sentence">I always carry our ❧commander&#39;s☙ authority.</div><div class="class-sentence">I always have the supplies others need.</div><div class="class-sentence">I always project my temperament onto the battlefield.</div><div class="class-sentence flaw">I always feel the weight of the military on my back.</div></div></div></div>
+<div class="sphere-panel" id="panel8"><div class="sphere-detail-title">Stories</div><div class="sphere-detail-impulse">Respond to an epic problem with everyday Means</div><div class="class-entry"><div class="class-entry-name">Fairy</div><div class="class-entry-tagline">A good-humored companion with a heart as large as their body is small.</div><div class="class-sentences"><div class="class-sentence">I always escape dangerous situations.</div><div class="class-sentence">I always console those in distress.</div><div class="class-sentence">I always heal those who&#39;ve been harmed.</div><div class="class-sentence flaw">I always underestimate what I&#39;m getting into.</div></div></div><div class="class-entry"><div class="class-entry-name">Goodfisher</div><div class="class-entry-tagline">Anglers, farmers, carpenters, and any others who do the daily work of the moons.</div><div class="class-sentences"><div class="class-sentence">I always put in an honest day&#39;s work.</div><div class="class-sentence">I always find a simple but effective solution.</div><div class="class-sentence">I always remind people of their origins.</div><div class="class-sentence flaw">I always struggle against ❧my roots☙.</div></div></div><div class="class-entry"><div class="class-entry-name">Kid</div><div class="class-entry-tagline">A plucky scamp. The world&#39;s crawling with them, but this one&#39;s different.</div><div class="class-sentences"><div class="class-sentence">I always slip away unharmed.</div><div class="class-sentence">I always see things differently than adults.</div><div class="class-sentence">I always have a trick up my sleeve.</div><div class="class-sentence flaw">I always get in over my head.</div></div></div><div class="class-entry"><div class="class-entry-name">Oriser</div><div class="class-entry-tagline">Pilgrims, penitents, and proselytes.</div><div class="class-sentences"><div class="class-sentence">I always find refuge among other believers.</div><div class="class-sentence">I always endure through hazardous territory.</div><div class="class-sentence">I always see a miracle in the mundane.</div><div class="class-sentence flaw">I always judge or am judged by those who do not believe.</div></div></div><div class="class-entry"><div class="class-entry-name">Struggler</div><div class="class-entry-tagline">You are closer to death than anyone, and thus you excel at escaping it.</div><div class="class-sentences"><div class="class-sentence">I always fight my way to safety.</div><div class="class-sentence">I always find somewhere to rest.</div><div class="class-sentence">I always protect those traveling with me.</div><div class="class-sentence flaw">I always seem to be under threat.</div></div></div><div class="class-entry"><div class="class-entry-name">Testudine</div><div class="class-entry-tagline">Living bulwarks, shields, wardens, and anyone else who has mastered their shell.</div><div class="class-sentences"><div class="class-sentence">I always move with utmost care.</div><div class="class-sentence">I always understand practical matters.</div><div class="class-sentence">I always protect others with ❧shield☙ and shell.</div><div class="class-sentence flaw">I always move slower than others would like.</div></div></div></div>
+<div class="sphere-panel" id="panel9"><div class="sphere-detail-title">Semantics</div><div class="sphere-detail-impulse">Respond to a simple problem with complex Means</div><div class="warn-box">These classes have extra mechanical complexity. Worth avoiding for your first character.</div><div class="class-entry"><div class="class-entry-name">Eikonthrope</div><div class="class-entry-tagline">A mortal host bonded with a spirit. Manages two character sheets. Involuntarily transforms.</div><div class="class-sentences"><div class="class-sentence">I always keep a low profile. (Host)</div><div class="class-sentence">I always defend my territory. (Eikon)</div><div class="class-sentence">I always track down my prey. (Eikon)</div><div class="class-sentence flaw">I always involuntarily transform when struck by my ❧catalyst☙.</div></div></div><div class="class-entry"><div class="class-entry-name">Synecdochist</div><div class="class-entry-tagline">Channels power through Sympathetica — objects tied to greater forces via pact.</div><div class="class-sentences"><div class="class-sentence">With ❧Sympathetica A☙, I always…</div><div class="class-sentence">With ❧Sympathetica B☙, I always…</div><div class="class-sentence">With ❧Sympathetica C☙, I always…</div><div class="class-sentence flaw">I vowed that whenever I Realize a Sentence, I must cross out one Sympathetica.</div></div></div><div class="class-entry"><div class="class-entry-name">Flaneur</div><div class="class-entry-tagline">Wandering observer. Gains insight through detachment and careful watching.</div><div class="class-sentences"><div class="class-sentence">I always notice what others miss.</div><div class="class-sentence">I always know the city&#39;s hidden flows.</div><div class="class-sentence">I always find the right vantage point.</div><div class="class-sentence flaw">I always keep my distance.</div></div></div><div class="class-entry"><div class="class-entry-name">Impostor</div><div class="class-entry-tagline">Identity thief. Can borrow the Sentences of other characters temporarily.</div><div class="class-sentences"><div class="class-sentence">I always wear the face I need.</div><div class="class-sentence">I always know what someone wants to hear.</div><div class="class-sentence">I always find a way inside.</div><div class="class-sentence flaw">I always leave behind a question about who I really am.</div></div></div><div class="class-entry"><div class="class-entry-name">Panoplist</div><div class="class-entry-tagline">Collector and amasser. Gains power through accumulation of resources and leverage.</div><div class="class-sentences"><div class="class-sentence">I always have what others need.</div><div class="class-sentence">I always know who owes what to whom.</div><div class="class-sentence">I always find something worth keeping.</div><div class="class-sentence flaw">I always want more than I should.</div></div></div></div>
+</div>
+</div>
+  </div>
+</section>
+
+<!-- ══ 8. CLASS SENTENCES ON YOUR SHEET ══ -->
+<section class="slide" id="s8">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 2 of character creation</div>
+    <h2>Copy your four Class Sentences.</h2>
+    <p>Once you've picked a class, write its four Sentences on your sheet. They all start at <strong>+0</strong>. Leave room next to each for marks.</p>
+    <div class="two-col" style="margin-top:0.9em;">
+      <div>
+        <p style="margin-bottom:0.5em;"><strong>The first three Sentences</strong> are your main tools — your skills, equipment, and areas of mastery. They're intentionally broad at first.</p>
+        <div class="sentence-stack">
+          <div class="sentence-row"><div class="rank">+0</div><div class="sentence-text">I always get the drop on my target.</div></div>
+          <div class="sentence-row"><div class="rank">+0</div><div class="sentence-text">I always coat my blade with a useful poison.</div></div>
+          <div class="sentence-row"><div class="rank">+0</div><div class="sentence-text">I always disappear into the dark.</div></div>
+        </div>
+      </div>
+      <div>
+        <p style="margin-bottom:0.5em;"><strong>The fourth Sentence</strong> is a flaw, quirk, or hindrance. It can be used against you — but you can also trigger it deliberately to recharge your Token (called a Tragic Success).</p>
+        <div class="sentence-stack">
+          <div class="sentence-row" style="border-color:#7c4a4a; background:rgba(124,74,74,0.06);">
+            <div class="rank" style="color:#c47a7a;">+0</div>
+            <div class="sentence-text" style="color:var(--text);">I always find a well-paying job.</div>
+          </div>
+        </div>
+        <p style="margin-top:0.6em; font-size:clamp(0.68rem,1.02vw,0.8rem);">The flaw above makes the Blackguard mercenary by nature — useful for the GM to create complications, but also something the player can lean into for Token economy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 9. HALLMARKS ══ -->
+<section class="slide" id="s9">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 2 continued</div>
+    <h2>Name your Hallmarks.</h2>
+    <p>Some Sentences have words wrapped in special marks: <em>❧like this☙</em>. Those are <strong>Hallmarks</strong>. They're placeholders for something specific to your character — a weapon, a mount, a companion, a vessel. Name them now.</p>
+    <div class="hallmark-row">
+      <div class="hm-block">
+        <div class="hm-label">Before</div>
+        <div class="hm-before">I always wield a ❧beautiful and distinct weapon☙.</div>
+        <div class="hm-arrow">↓ you name the hallmark</div>
+        <div class="hm-label">After</div>
+        <div class="hm-after">I always wield <em>Vespertine</em>, my crescent-bladed sword.</div>
+        <div class="hm-note">Now the Sentence is yours, not generic. It does the same thing mechanically — it just has a name now.</div>
+      </div>
+      <div class="hm-block">
+        <div class="hm-label">Before</div>
+        <div class="hm-before">I always hunt alongside my ❧loyal companion☙.</div>
+        <div class="hm-arrow">↓ you name the hallmark</div>
+        <div class="hm-label">After</div>
+        <div class="hm-after">I always hunt alongside <em>Thresh</em>, my grey hunting hound.</div>
+        <div class="hm-note">The companion has a name. That matters when the story has to reckon with them.</div>
+      </div>
+    </div>
+    <div class="highlight">
+      Keep Hallmarks broad at first. A Sentence like "I always have the necessary tool on hand" is intentionally vague — its power is in the flexibility. Don't limit it in your head before Realization does it for you.
+    </div>
+  </div>
+</section>
+
+<!-- ══ 10. BONDS ══ -->
+<section class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 3 of character creation</div>
+    <h2>Choose your two Bonds.</h2>
+    <p>Bonds are Sentences about your relationship with another player character. They can be used as a Means in Conflict — but only when the fiction reflects that relationship being relevant. Each Bond targets a <strong>different person</strong>. Your two Bonds can't go to the same character.</p>
+    <p>Your Class comes with example Bonds. Use them, rework them, or write your own. Good Bonds are specific and active.</p>
+    <div class="two-col" style="margin-top:0.5em;">
+      <div>
+        <div class="bond-example">
+          <div class="bond-example-label">Too vague</div>
+          <div class="bond-text">[Character] and I have been through a lot together.</div>
+          <div class="bond-note">This doesn't give you anything to grab onto in play.</div>
+        </div>
+        <div class="bond-example">
+          <div class="bond-example-label">Too vague</div>
+          <div class="bond-text">I care about [Character].</div>
+          <div class="bond-note">Still not actionable.</div>
+        </div>
+      </div>
+      <div>
+        <div class="bond-example">
+          <div class="bond-example-label">Good</div>
+          <div class="bond-text">[Character] is a wild bull — but sometimes you need a wild bull.</div>
+          <div class="bond-note">Specific. Tells you how this character sees the other one. Has a point of view.</div>
+        </div>
+        <div class="bond-example">
+          <div class="bond-example-label">Good</div>
+          <div class="bond-text">I will prove I am stronger than [Character], even if that means fighting them myself.</div>
+          <div class="bond-note">Active. Generates story. You know exactly when this Bond is relevant.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 11. HOW BONDS WORK IN PLAY ══ -->
+<section class="slide" id="s11">
+  <div class="slide-inner">
+    <div class="eyebrow">Bonds in play</div>
+    <h2>Using and growing your Bonds.</h2>
+    <div class="three-col">
+      <div class="card">
+        <div class="card-label">Using a Bond as a Means</div>
+        <p>Use it like any other Sentence. But the fiction has to reflect the Bond — the other character is present, or their presence is clearly felt, or the thematic link is obvious. It can't just be "I use my Bond."</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Marks and Realization</div>
+        <p>Bonds get marked after every use, win or lose. Three marks and the Bond is Primed. When it Realizes, <strong>both</strong> characters named in it recharge their Tokens. Then the Bond evolves, same as a Class Sentence.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Boosting with Tokens</div>
+        <p>You or the other named character can each spend a Token to boost the Bond +1 before it's compared. If both of you spend, it goes up +2. Useful when the Bond is your best option.</p>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top:0.8em;">
+      As long as a Bond is still +0 and has no marks, you can erase it and rewrite it completely. Once it's been Realized, it stays on its path.
+    </div>
+  </div>
+</section>
+
+<!-- ══ 12. DREAM ══ -->
+<section class="slide" id="s12">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 4 of character creation</div>
+    <h2>Pick your Dream.</h2>
+    <p>A Dream is a single-use, once-ever Sentence. Cross it off and you overcome any uncertain obstacle — even one you'd normally lose. Your Class has three example Dreams. Pick one, or write your own.</p>
+    <p>Your character can know their Dream as a conscious goal, or it can be something you as a player are steering toward privately. Both work.</p>
+    <div class="dream-examples">
+      <div class="dream-item">
+        <div class="dream-class">Berserker</div>
+        <div class="dream-text">I will find transcendent clarity in the midst of battle and become my truest self.</div>
+      </div>
+      <div class="dream-item">
+        <div class="dream-class">Questionist</div>
+        <div class="dream-text">I will solve the case that everyone told me was impossible.</div>
+      </div>
+      <div class="dream-item">
+        <div class="dream-class">Oriser</div>
+        <div class="dream-text">I will complete the pilgrimage and return home changed.</div>
+      </div>
+      <div class="dream-item">
+        <div class="dream-class">Duelist</div>
+        <div class="dream-text">I will defeat my rival in fair and final combat.</div>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top:0.7em;">
+      Achieving your Dream is a natural place to retire your character. But you don't have to — some characters are more interesting to follow after they've gotten what they wanted.
+    </div>
+  </div>
+</section>
+
+<!-- ══ 13. IMPULSE + TOKEN ══ -->
+<section class="slide" id="s13">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 5 of character creation</div>
+    <h2>Write your Impulse. Take your Token.</h2>
+    <p>Copy your Sphere's Impulse onto your character sheet. This is how your Token recharges during play.</p>
+    <div class="two-col" style="margin-top:0.7em;">
+      <div>
+        <div class="card" style="margin-bottom:0.6em;">
+          <div class="card-label">Impulse example — Sphere of Shadow</div>
+          <p style="font-family:'Crimson Pro',serif; font-style:italic; font-size:clamp(0.9rem,1.4vw,1.05rem); color:var(--white);">Respond to a noble problem with dishonorable Means.</div>
+          <p style="margin-top:0.5em;">If you're in the Shadow Sphere, your Token recharges whenever you use a Means that fits this pattern during a Conflict — win or lose.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Also recharges your Token</div>
+          <p>Triggering your flaw Sentence on purpose, leading yourself into trouble (Tragic Success). And when one of your Bonds Realizes, both named characters recharge.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="height:100%;">
+          <div class="card-label">Spending your Token</div>
+          <p style="margin-bottom:0.6em;"><strong>Boost a Means +1</strong> for the current Conflict. Do this before comparing ranks.</p>
+          <p style="margin-bottom:0.6em;"><strong>Invoke a Moon Sentence</strong> — if a Moon Sentence has been established for the area you're in, you can use it as a Means.</p>
+          <p><strong>Add a new Moon Sentence</strong> — write a new +0 Sentence onto the current Moon Sheet describing something true about this place. You can use it as a Means immediately.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 14. NAME + FINISHING TOUCHES ══ -->
+<section class="slide" id="s14">
+  <div class="slide-inner">
+    <div class="eyebrow">Step 6 of character creation</div>
+    <h2>Name your character.</h2>
+    <p>Name, pronouns, and a Sentence or two of backstory. That's all you need. Don't over-explain — your character will reveal themselves through play.</p>
+    <div class="two-col" style="margin-top:0.8em;">
+      <div class="card">
+        <div class="card-label">What to include</div>
+        <p style="margin-bottom:0.4em;">Name and pronouns.</p>
+        <p style="margin-bottom:0.4em;">What they look like, roughly.</p>
+        <p style="margin-bottom:0.4em;">A sentence or two about who they are before the story begins.</p>
+        <p>Any pre-existing connections to other player characters — things they've already done together, old debts, shared history.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">What to leave open</div>
+        <p style="margin-bottom:0.4em;">Most of your past. Realis characters are shaped by what happens to them during play, not before it.</p>
+        <p style="margin-bottom:0.4em;">Family, backstory trauma, long origin histories — these can be there if you want them, but they're not load-bearing.</p>
+        <p>Leave room for the story to surprise you about who this person actually is.</p>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top:0.7em;">
+      Your four Class Sentences already tell us a lot about who your character is. The backstory is just context for those Sentences — not the other way around.
+    </div>
+  </div>
+</section>
+
+<!-- ══ 15. FOUNDATION SENTENCES ══ -->
+<section class="slide" id="s15">
+  <div class="slide-inner">
+    <div class="eyebrow">Session Zero · Before anything else</div>
+    <h2>Foundation Sentences.</h2>
+    <p>Before characters are finalized and before play starts, the group writes <strong>Foundation Sentences</strong> together. These are your shared safety tools — anyone can invoke them at any time to pause play and redirect the story.</p>
+    <p>You fill in three prompts, writing as many sentences as you need for each:</p>
+    <div class="foundation-prompts">
+      <div class="fp-block">
+        <div class="fp-prompt">Our story always…</div>
+        <div class="fp-example">rewards curiosity over caution.</div>
+        <div class="fp-example">makes consequences feel real.</div>
+        <div class="fp-note">What you want the story to consistently do.</div>
+      </div>
+      <div class="fp-block">
+        <div class="fp-prompt">Our story never…</div>
+        <div class="fp-example">uses sexual violence as a plot device.</div>
+        <div class="fp-example">treats death as comedy.</div>
+        <div class="fp-note">Hard limits. Non-negotiable, always in effect.</div>
+      </div>
+      <div class="fp-block">
+        <div class="fp-prompt">Our story will, but only with distance and care, include…</div>
+        <div class="fp-example">loss of a character the group loves.</div>
+        <div class="fp-example">betrayal within the Band.</div>
+        <div class="fp-note">Things that are allowed but need a heads-up and some care in the handling.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 16. BAND CREATION ══ -->
+<section class="slide" id="s16">
+  <div class="slide-inner">
+    <div class="eyebrow">Session Zero · Your group</div>
+    <h2>Create your Band.</h2>
+    <p>A Band is the group of characters playing together. It has three things: a <strong>Concept</strong>, a <strong>Name</strong>, and a <strong>Band Sentence</strong>.</p>
+    <div class="three-col" style="margin-top:0.8em;">
+      <div class="card">
+        <div class="card-label">Band Concept</div>
+        <p>A short phrase for what ties the group together — the kind of work they do, a shared relationship, or some metaphysical link. Start small and focused.</p>
+        <p style="margin-top:0.4em; font-family:'Crimson Pro',serif; font-style:italic; color:var(--text-dim);">A research team digging into the mysteries of a dead moon. A circus trying to earn enough to escape a backwater world.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Band Name</div>
+        <p>What your characters call themselves. Can be grand and self-important, or something they got stuck with. Doesn't have to mean anything deep.</p>
+        <p style="margin-top:0.4em; font-family:'Crimson Pro',serif; font-style:italic; color:var(--text-dim);">The Harrock Expedition. Mr. Besto's Silver Hoop Parade. Ratrunners, Inc. Band of the Charred Axe.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Band Sentence</div>
+        <p>Always starts at <strong>+1</strong>. Always begins: <em>"When we work together, we always…"</em> One use per session, requires full group agreement to invoke.</p>
+        <p style="margin-top:0.4em; font-family:'Crimson Pro',serif; font-style:italic; color:var(--text-dim);">"When we work together, we always find justice on the end of a blade."</p>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top:0.8em;">
+      You can rewrite the Band Sentence at any time — start or end of session, even mid-play — as long as everyone agrees. The rank stays the same. The Band is a living thing.
+    </div>
+  </div>
+</section>
+
+<!-- ══ 17. SESSION ZERO CHECKLIST ══ -->
+<section class="slide" id="s17">
+  <div class="slide-inner">
+    <div class="eyebrow">Session Zero · Checklist</div>
+    <h2>Everything before the first scene.</h2>
+    <div class="sz-steps">
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Write Foundation Sentences together</div>
+          <div class="sz-desc">Three prompts: always / never / with care. Do this before character creation so it shapes everything else.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Browse the Class chapter and pick a Class</div>
+          <div class="sz-desc">Pages 95–239. Find a name that sparks something. Don't optimize for the best combo — pick the one that feels right.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Copy your four Class Sentences. Name your Hallmarks.</div>
+          <div class="sz-desc">All start at +0. For any ❧bracketed word☙, give it a concrete name specific to your character.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Choose two Bond Sentences — one per person</div>
+          <div class="sz-desc">Each Bond targets a different player character. Use the examples in your Class or write your own. Be specific about what you actually think of them.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Pick your Dream</div>
+          <div class="sz-desc">One per character, one use ever. Choose from your Class's examples or write your own.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Copy your Sphere's Impulse. Note your Token (start with one, uncharged).</div>
+          <div class="sz-desc">The Impulse is how you recharge your Token during play.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Name your character. Write one or two sentences of backstory.</div>
+          <div class="sz-desc">Name, pronouns, what they look like, and any existing connections to other characters.</div>
+        </div>
+      </div>
+      <div class="sz-step" onclick="this.classList.toggle('done')">
+        <div class="sz-check"></div>
+        <div class="sz-body">
+          <div class="sz-title">Create your Band: Concept, Name, Band Sentence</div>
+          <div class="sz-desc">"When we work together, we always…" — starts at +1, one use per session with full group agreement.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 18. CLOSE ══ -->
+<section class="slide slide-title" id="s18">
+  <div class="stars" id="stars2"></div>
+  <div class="corpse-sun" style="opacity:0.15; top:-8vw; left:-8vw; right:auto;"></div>
+  <div class="slide-inner">
+    <div class="eyebrow">You're ready</div>
+    <div class="close-lines">
+      Pick the class name<br>
+      that feels right.<br>
+      Let your Sentences <em>fail</em>.<br>
+      See who you become.
+    </div>
+    <div class="tagline">The thousand moons aren't going anywhere.</div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<div id="counter">1 / 18</div>
+<div id="dots"></div>
+
+<script>
+// ── NAV ──
+const deck    = document.getElementById('deck');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const counter = document.getElementById('counter');
+const dotsEl  = document.getElementById('dots');
+
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+});
+const dots = Array.from(dotsEl.querySelectorAll('.dot'));
+
+function currentIndex() { return Math.round(deck.scrollTop / deck.clientHeight); }
+function goTo(i) { deck.scrollTo({ top: i * deck.clientHeight, behavior: 'smooth' }); }
+function update() {
+  const i = currentIndex();
+  counter.textContent = (i + 1) + ' / ' + slides.length;
+  dots.forEach((d, j) => d.classList.toggle('active', j === i));
+}
+deck.addEventListener('scroll', update, { passive: true });
+document.addEventListener('keydown', e => {
+  const i = currentIndex();
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(Math.min(i+1, slides.length-1)); }
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')                   { e.preventDefault(); goTo(Math.max(i-1, 0)); }
+});
+
+// ── STARS ──
+function makeStars(id, n) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.2 + 0.4;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${(Math.random()*0.6+0.1).toFixed(2)}`;
+    c.appendChild(s);
+  }
+}
+makeStars('stars1', 120);
+makeStars('stars2', 80);
+
+
+</script>
+</body>
+</html>
